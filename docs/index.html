@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klein Meridian Consulting, LLC | GIS Solutions</title>
+  <meta name="description" content="Klein Meridian Consulting provides expert GIS mapping, spatial analysis, and geospatial consulting services.">
+  <link rel="icon" href="images/Logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface-hover: #1a1a1a;
+      --border: #222222;
+      --text: #f0f0f0;
+      --text-muted: #888888;
+      --accent: #c8b560;
+      --accent-dim: rgba(200, 181, 96, 0.15);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Topo background pattern ── */
+    .topo-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.03;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='600' height='600' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 300 Q150 250 300 300 T600 300' fill='none' stroke='white' stroke-width='1'/%3E%3Cpath d='M0 280 Q150 230 300 280 T600 280' fill='none' stroke='white' stroke-width='1'/%3E%3Cpath d='M0 320 Q150 270 300 320 T600 320' fill='none' stroke='white' stroke-width='1'/%3E%3Cpath d='M0 260 Q150 210 300 260 T600 260' fill='none' stroke='white' stroke-width='1'/%3E%3Cpath d='M0 340 Q150 290 300 340 T600 340' fill='none' stroke='white' stroke-width='1'/%3E%3Cpath d='M0 240 Q150 190 300 240 T600 240' fill='none' stroke='white' stroke-width='1'/%3E%3Cpath d='M0 360 Q150 310 300 360 T600 360' fill='none' stroke='white' stroke-width='1'/%3E%3Cpath d='M0 200 Q150 150 300 200 T600 200' fill='none' stroke='white' stroke-width='1'/%3E%3Cpath d='M0 400 Q150 350 300 400 T600 400' fill='none' stroke='white' stroke-width='1'/%3E%3C/svg%3E");
+      background-size: 600px 600px;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .nav-logo img {
+      height: 36px;
+      width: 36px;
+      object-fit: cover;
+      object-position: center 35%;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+    }
+
+    .nav-logo span {
+      font-weight: 600;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 400;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--accent);
+      color: var(--bg);
+      padding: 0.55rem 1.25rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* Mobile menu */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 4rem;
+    }
+
+    .hero-content { max-width: 720px; }
+
+    .hero-logo {
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 2rem;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center 28%;
+      box-shadow: 0 4px 30px rgba(200, 181, 96, 0.12), 0 0 80px rgba(0,0,0,0.6);
+      border: 2px solid rgba(200, 181, 96, 0.2);
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero .tagline {
+      font-size: 1rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover { border-color: var(--text-muted); background: var(--surface); }
+
+    /* ── Section defaults ── */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 6rem 2rem;
+    }
+
+    .section-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 3rem;
+    }
+
+    /* ── Services ── */
+    #services { border-top: 1px solid var(--border); }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .service-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      transition: all 0.25s;
+    }
+
+    .service-card:hover {
+      border-color: var(--accent);
+      background: var(--surface-hover);
+      transform: translateY(-2px);
+    }
+
+    .service-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--accent-dim);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      font-size: 1.3rem;
+    }
+
+    .service-card h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.65rem;
+    }
+
+    .service-card p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.65;
+    }
+
+    /* ── About ── */
+    #about { border-top: 1px solid var(--border); }
+
+    .about-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .about-text p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.75;
+      margin-bottom: 1.25rem;
+    }
+
+    .about-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 0.35rem;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── Process ── */
+    #process { border-top: 1px solid var(--border); }
+
+    .process-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+      counter-reset: step;
+    }
+
+    .step {
+      position: relative;
+      padding: 2rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      counter-increment: step;
+    }
+
+    .step::before {
+      content: counter(step, decimal-leading-zero);
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      opacity: 0.3;
+      line-height: 1;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .step h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .step p {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    /* ── Contact ── */
+    #contact { border-top: 1px solid var(--border); }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+    }
+
+    .contact-info h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .contact-info p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    .contact-detail {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    .contact-detail span:first-child {
+      width: 36px;
+      height: 36px;
+      background: var(--accent-dim);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+      outline: none;
+      width: 100%;
+    }
+
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .contact-form textarea { resize: vertical; min-height: 130px; }
+
+    .contact-form .btn { width: 100%; justify-content: center; }
+
+    /* ── Footer ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 2rem;
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-inner p {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .menu-toggle { display: block; }
+
+      .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 72px;
+        left: 0;
+        right: 0;
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(20px);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border);
+        gap: 1rem;
+      }
+
+      .about-content,
+      .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+
+      .form-row { grid-template-columns: 1fr; }
+
+      section { padding: 4rem 1.5rem; }
+
+      .footer-inner {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
+    /* ── Fade-in animation ── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="topo-bg"></div>
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <img src="images/Logo.png" alt="Klein Meridian">
+        <span>Klein Meridian</span>
+      </a>
+      <button class="menu-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+      <ul class="nav-links">
+        <li><a href="#services">Services</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#process">Process</a></li>
+        <li><a href="#contact" class="nav-cta">Get in Touch</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <img src="images/Logo.png" alt="Klein Meridian Consulting" class="hero-logo">
+      <p class="tagline">GIS &amp; Geospatial Consulting</p>
+      <h1>Mapping Solutions That Drive Decisions</h1>
+      <p>Expert geospatial analysis, custom mapping, and spatial data services tailored to your project needs.</p>
+      <div class="hero-buttons">
+        <a href="#contact" class="btn btn-primary">Start a Project</a>
+        <a href="#services" class="btn btn-outline">Our Services</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section id="services">
+    <div class="section-inner">
+      <p class="section-label fade-in">What We Do</p>
+      <h2 class="section-title fade-in">Services</h2>
+      <p class="section-desc fade-in">From field data collection to final deliverables, we provide end-to-end geospatial solutions.</p>
+      <div class="services-grid">
+        <div class="service-card fade-in">
+          <div class="service-icon">&#127758;</div>
+          <h3>GIS Mapping &amp; Cartography</h3>
+          <p>Custom maps and visual products built for clarity, accuracy, and impact. Print-ready and interactive web maps available.</p>
+        </div>
+        <div class="service-card fade-in">
+          <div class="service-icon">&#128202;</div>
+          <h3>Spatial Analysis</h3>
+          <p>Site suitability, network analysis, terrain modeling, and data-driven insights to support planning and decision-making.</p>
+        </div>
+        <div class="service-card fade-in">
+          <div class="service-icon">&#128225;</div>
+          <h3>Data Collection</h3>
+          <p>High-accuracy field data capture. We structure and deliver data ready for your workflows.</p>
+        </div>
+        <div class="service-card fade-in">
+          <div class="service-icon">&#128187;</div>
+          <h3>Database Design</h3>
+          <p>Geodatabase architecture, data migration, and management solutions built for scalability and interoperability.</p>
+        </div>
+        <div class="service-card fade-in">
+          <div class="service-icon">&#128752;</div>
+          <h3>Remote Sensing</h3>
+          <p>Satellite and aerial imagery analysis for land use classification, change detection, and environmental monitoring.</p>
+        </div>
+        <div class="service-card fade-in">
+          <div class="service-icon">&#128640;</div>
+          <h3>Web GIS &amp; Applications</h3>
+          <p>Interactive dashboards, story maps, and custom web applications powered by ArcGIS, Mapbox, or open-source tools.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about">
+    <div class="section-inner">
+      <p class="section-label fade-in">Who We Are</p>
+      <h2 class="section-title fade-in">About Klein Meridian</h2>
+      <div class="about-content">
+        <div class="about-text fade-in">
+          <p>Klein Meridian Consulting, LLC delivers precise, actionable geospatial solutions for government agencies, engineering firms, environmental organizations, and private-sector clients.</p>
+          <p>We combine deep technical expertise with a consultative approach&mdash;understanding your objectives first, then applying the right tools and methods to meet them.</p>
+          <p>Whether you need a one-time analysis or ongoing GIS program support, we scale to fit your needs and timeline.</p>
+        </div>
+        <div class="about-stats fade-in">
+          <div class="stat">
+            <div class="stat-number">GIS</div>
+            <div class="stat-label">Core Expertise</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Client Focused</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">Data</div>
+            <div class="stat-label">ANALYSIS</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Project Support</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process -->
+  <section id="process">
+    <div class="section-inner">
+      <p class="section-label fade-in">How We Work</p>
+      <h2 class="section-title fade-in">Our Process</h2>
+      <p class="section-desc fade-in">A straightforward approach that keeps projects on scope, on time, and on budget.</p>
+      <div class="process-steps">
+        <div class="step fade-in">
+          <h3>Discovery</h3>
+          <p>We learn about your goals, data, and constraints to define a clear project scope.</p>
+        </div>
+        <div class="step fade-in">
+          <h3>Data &amp; Analysis</h3>
+          <p>We gather, clean, and process your geospatial data using industry-standard tools.</p>
+        </div>
+        <div class="step fade-in">
+          <h3>Deliverables</h3>
+          <p>Maps, reports, dashboards, or data products&mdash;built exactly to your specifications.</p>
+        </div>
+        <div class="step fade-in">
+          <h3>Support</h3>
+          <p>Ongoing assistance, training, and updates to ensure long-term value from your GIS investment.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact">
+    <div class="section-inner">
+      <p class="section-label fade-in">Get Started</p>
+      <h2 class="section-title fade-in">Let's Talk About Your Project</h2>
+      <div class="contact-grid">
+        <div class="contact-info fade-in">
+          <h3>Reach Out</h3>
+          <p>Have a project in mind or need GIS expertise? We'd love to hear from you. Send us a message and we'll respond within one business day.</p>
+          <div class="contact-detail">
+            <span>&#9993;</span>
+            <span>info@kleinmeridian.com</span>
+          </div>
+          <div class="contact-detail">
+            <span>&#9742;</span>
+            <span>(704) 832-5631</span>
+          </div>
+          <div class="contact-detail">
+            <span>&#9873;</span>
+            <span>United States</span>
+          </div>
+        </div>
+        <form class="contact-form fade-in" onsubmit="event.preventDefault(); alert('Message sent! We\'ll be in touch shortly.'); this.reset();">
+          <div class="form-row">
+            <input type="text" name="name" placeholder="Your Name" required>
+            <input type="email" name="email" placeholder="Email Address" required>
+          </div>
+          <input type="text" name="subject" placeholder="Subject">
+          <textarea name="message" placeholder="Tell us about your project..." required></textarea>
+          <button type="submit" class="btn btn-primary">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <p>&copy; 2026 Klein Meridian Consulting, LLC. All rights reserved.</p>
+      <ul class="footer-links">
+        <li><a href="#services">Services</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  
+
+  <script>
+    // Intersection Observer for fade-in animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Close mobile nav on link click
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+        document.querySelector('.nav-links').classList.remove('open');
+      });
+    });
+
+    // Shrink nav on scroll
+    window.addEventListener('scroll', () => {
+      document.querySelector('nav').style.borderBottomColor =
+        window.scrollY > 50 ? 'var(--border)' : 'transparent';
+    });
+  </script>
+</body>
+</html>
