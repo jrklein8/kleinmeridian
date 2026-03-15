@@ -304,9 +304,18 @@
 
     .about-content {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
+      grid-template-columns: auto 1fr 1fr;
+      gap: 3rem;
       align-items: center;
+    }
+
+    .about-headshot {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center top;
+      border: 3px solid var(--accent);
     }
 
     .about-text p {
@@ -527,6 +536,12 @@
         gap: 2.5rem;
       }
 
+      .about-headshot {
+        width: 160px;
+        height: 160px;
+        justify-self: center;
+      }
+
       .form-row { grid-template-columns: 1fr; }
 
       section { padding: 4rem 1.5rem; }
@@ -592,34 +607,28 @@
       <p class="section-desc fade-in">From field data collection to final deliverables, we provide end-to-end geospatial solutions.</p>
       <div class="services-grid">
         <div class="service-card fade-in">
-
           <h3>Web GIS &amp; Applications</h3>
           <p>Interactive dashboards, story maps, and custom web applications powered by ArcGIS, Mapbox, or open-source tools.</p>
         </div>
         <div class="service-card fade-in">
-
-          <h3>GIS Mapping &amp; Cartography</h3>
-          <p>Custom maps and visual products built for clarity, accuracy, and impact. Print-ready and interactive web maps available.</p>
+          <h3>Spatial Analysis &amp; Modeling</h3>
+          <p>Geoprocessing, suitability analysis, network analysis, and predictive spatial modeling to support planning and decision-making.</p>
         </div>
         <div class="service-card fade-in">
-
+          <h3>Geospatial Automation &amp; Scripting</h3>
+          <p>Python-based workflows using ArcPy and GDAL to automate repetitive GIS tasks, data processing, and report generation.</p>
+        </div>
+        <div class="service-card fade-in">
           <h3>Data Collection</h3>
-          <p>High-accuracy field data capture. We structure and deliver data ready for your workflows.</p>
+          <p>High-accuracy data capture. We structure and deliver data ready for your workflows.</p>
         </div>
         <div class="service-card fade-in">
-
-          <h3>Data Collection</h3>
-          <p>High-accuracy field data capture. We structure and deliver data ready for your workflows.</p>
-        </div>
-        <div class="service-card fade-in">
-
           <h3>Database Design</h3>
           <p>Geodatabase architecture, data migration, and management solutions built for scalability and interoperability.</p>
         </div>
         <div class="service-card fade-in">
-
-          <h3>Remote Sensing</h3>
-          <p>Satellite and aerial imagery analysis for land use classification, change detection, and environmental monitoring.</p>
+          <h3>GIS Mapping &amp; Cartography</h3>
+          <p>Custom maps and visual products built for clarity, accuracy, and impact. Print-ready and interactive web maps available.</p>
         </div>
       </div>
     </div>
@@ -631,6 +640,7 @@
       <p class="section-label fade-in">Who We Are</p>
       <h2 class="section-title fade-in">About Klein Meridian</h2>
       <div class="about-content">
+        <img src="images/headshot.jpg" alt="Justin Klein" class="about-headshot fade-in">
         <div class="about-text fade-in">
           <p>Justin Klein, founder of Klein Meridian Consulting, is a geospatial intelligence professional with extensive experience in spatial analysis, enterprise GIS systems, and geospatial data engineering. With over 10 years of experience, he has worked across infrastructure research, government deliverables, and private-sector consulting, applying advanced GIS, spatial modeling, and Python automation to solve complex geographic problems.</p>
           <p>Justin combines deep technical expertise with a practical, results-focused mindset—helping organizations turn spatial data into clear insights and informed decisions.</p>

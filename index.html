@@ -141,15 +141,22 @@
 
     .hero-content { max-width: 720px; }
 
-    .hero-logo {
-      width: 140px;
-      height: 140px;
+    .hero-logo-wrapper {
+      width: 160px;
+      height: 160px;
       margin: 0 auto 2rem;
       border-radius: 50%;
-      object-fit: cover;
-      object-position: center 28%;
+      overflow: hidden;
       box-shadow: 0 4px 30px rgba(200, 181, 96, 0.12), 0 0 80px rgba(0,0,0,0.6);
       border: 2px solid rgba(200, 181, 96, 0.2);
+    }
+
+    .hero-logo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 63% 48%;
+      transform: scale(1.25);
     }
 
     .hero h1 {
@@ -304,9 +311,18 @@
 
     .about-content {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
+      grid-template-columns: auto 1fr 1fr;
+      gap: 3rem;
       align-items: center;
+    }
+
+    .about-headshot {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center top;
+      border: 3px solid var(--accent);
     }
 
     .about-text p {
@@ -527,6 +543,12 @@
         gap: 2.5rem;
       }
 
+      .about-headshot {
+        width: 160px;
+        height: 160px;
+        justify-self: center;
+      }
+
       .form-row { grid-template-columns: 1fr; }
 
       section { padding: 4rem 1.5rem; }
@@ -642,7 +664,9 @@
   <!-- Hero -->
   <section class="hero">
     <div class="hero-content">
-      <img src="images/Logo.png" alt="Klein Meridian Consulting" class="hero-logo">
+      <div class="hero-logo-wrapper">
+        <img src="images/Logo.png" alt="Klein Meridian Consulting" class="hero-logo">
+      </div>
       <p class="tagline" data-editable="hero-tagline">GIS &amp; Geospatial Consulting</p>
       <h1 data-editable="hero-headline">Mapping Solutions That Drive Decisions</h1>
       <p data-editable="hero-desc">Expert geospatial analysis, custom mapping, and spatial data services tailored to your project needs.</p>
@@ -661,34 +685,28 @@
       <p class="section-desc fade-in" data-editable="services-desc">From field data collection to final deliverables, we provide end-to-end geospatial solutions.</p>
       <div class="services-grid">
         <div class="service-card fade-in">
-
           <h3 data-editable="service-1-title">Web GIS &amp; Applications</h3>
           <p data-editable="service-1-desc">Interactive dashboards, story maps, and custom web applications powered by ArcGIS, Mapbox, or open-source tools.</p>
         </div>
         <div class="service-card fade-in">
-
-          <h3 data-editable="service-2-title">GIS Mapping &amp; Cartography</h3>
-          <p data-editable="service-2-desc">Custom maps and visual products built for clarity, accuracy, and impact. Print-ready and interactive web maps available.</p>
+          <h3 data-editable="service-4-title">Spatial Analysis &amp; Modeling</h3>
+          <p data-editable="service-4-desc">Geoprocessing, suitability analysis, network analysis, and predictive spatial modeling to support planning and decision-making.</p>
         </div>
         <div class="service-card fade-in">
-
-          <h3 data-editable="service-3-title">Spatial Analysis</h3>
-          <p data-editable="service-3-desc">Site suitability, network analysis, terrain modeling, and data-driven insights to support planning and decision-making.</p>
+          <h3 data-editable="service-6-title">Geospatial Automation &amp; Scripting</h3>
+          <p data-editable="service-6-desc">Python-based workflows using ArcPy and GDAL to automate repetitive GIS tasks, data processing, and report generation.</p>
         </div>
         <div class="service-card fade-in">
-
-          <h3 data-editable="service-4-title">Data Collection</h3>
-          <p data-editable="service-4-desc">High-accuracy field data capture. We structure and deliver data ready for your workflows.</p>
+          <h3 data-editable="service-3-title">Data Collection</h3>
+          <p data-editable="service-3-desc">High-accuracy data capture. We structure and deliver data ready for your workflows.</p>
         </div>
         <div class="service-card fade-in">
-
           <h3 data-editable="service-5-title">Database Design</h3>
           <p data-editable="service-5-desc">Geodatabase architecture, data migration, and management solutions built for scalability and interoperability.</p>
         </div>
         <div class="service-card fade-in">
-
-          <h3 data-editable="service-6-title">Remote Sensing</h3>
-          <p data-editable="service-6-desc">Satellite and aerial imagery analysis for land use classification, change detection, and environmental monitoring.</p>
+          <h3 data-editable="service-2-title">GIS Mapping &amp; Cartography</h3>
+          <p data-editable="service-2-desc">Custom maps and visual products built for clarity, accuracy, and impact. Print-ready and interactive web maps available.</p>
         </div>
       </div>
     </div>
@@ -700,6 +718,7 @@
       <p class="section-label fade-in" data-editable="about-label">Who We Are</p>
       <h2 class="section-title fade-in" data-editable="about-title">About Klein Meridian</h2>
       <div class="about-content">
+        <img src="images/headshot.jpg" alt="Justin Klein" class="about-headshot fade-in">
         <div class="about-text fade-in">
           <p data-editable="about-p1">Justin Klein, founder of Klein Meridian Consulting, is a geospatial intelligence professional with extensive experience in spatial analysis, enterprise GIS systems, and geospatial data engineering. He has worked across infrastructure research, government mapping, and private-sector consulting, applying advanced GIS, spatial modeling, and Python automation to solve complex geographic problems.</p>
           <p data-editable="about-p2">Justin combines deep technical expertise with a practical, results-focused mindset&mdash;helping organizations turn spatial data into clear insights and informed decisions.</p>

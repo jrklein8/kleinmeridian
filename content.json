@@ -6,8 +6,15 @@
   "contact-phone": "(704) 832-5631",
   "contact-location": "United States",
   "service-3-title": "Data Collection",
-  "service-3-desc": "High-accuracy field data capture. We structure and deliver data ready for your workflows.",
+  "service-3-desc": "High-accuracy data capture. We structure and deliver data ready for your workflows.",
   "hero-headline": "Spatial Intelligence That Drive Decisions",
   "about-p1": "Justin Klein, founder of Klein Meridian Consulting, is a geospatial intelligence professional with extensive experience in spatial analysis, enterprise GIS systems, and geospatial data engineering. With over 10 years of experience, he has worked across infrastructure research, government deliverables, and private-sector consulting, applying advanced GIS, spatial modeling, and Python automation to solve complex geographic problems.",
-  "about-p2": "Justin combines deep technical expertise with a practical, results-focused mindset—helping organizations turn spatial data into clear insights and informed decisions."
+  "about-p2": "Justin combines deep technical expertise with a practical, results-focused mindset—helping organizations turn spatial data into clear insights and informed decisions.",
+  "service-6-desc": "Python-based workflows using ArcPy and GDAL to automate repetitive GIS tasks, data scraping/processing, and report generation.",
+  "service-2-title": "GIS Mapping & Cartography",
+  "services-desc": "From data collection to final deliverables, we provide end-to-end geospatial solutions.",
+  "service-1-title": "Web GIS & Applications",
+  "service-4-title": "Spatial Analysis & Modeling",
+  "service-6-title": "Geospatial Automation & Scripting",
+  "service-5-desc": "Geodatabase architecture, data migration, and management solutions built for scalability and interoperability."
 }
