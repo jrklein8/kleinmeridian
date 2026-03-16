@@ -142,14 +142,14 @@
     .hero-content { max-width: 720px; }
 
     .hero-logo {
-      width: 140px;
-      height: 140px;
+      width: 160px;
+      height: 160px;
       margin: 0 auto 2rem;
       border-radius: 50%;
       object-fit: cover;
-      object-position: center 28%;
-      box-shadow: 0 4px 30px rgba(200, 181, 96, 0.12), 0 0 80px rgba(0,0,0,0.6);
-      border: 2px solid rgba(200, 181, 96, 0.2);
+      object-position: 63% 48%;
+      border: 2px solid rgba(200,181,96,0.4);
+      transform: scale(1.25);
     }
 
     .hero h1 {
@@ -552,6 +552,171 @@
       }
     }
 
+    /* ── Cinematic Intro ── */
+    .cin-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .cin-overlay.done {
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      pointer-events: none;
+    }
+
+    .cin-overlay.removed {
+      display: none;
+    }
+
+    .cin-bg-layers {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .cin-grid {
+      position: absolute;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      background:
+        repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(200,181,96,0.04) 59px, rgba(200,181,96,0.04) 60px),
+        repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(200,181,96,0.04) 59px, rgba(200,181,96,0.04) 60px);
+      animation: cin-grid-drift 12s linear infinite;
+    }
+
+    @keyframes cin-grid-drift {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(60px, 60px); }
+    }
+
+    .cin-gradient {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0;
+    }
+
+    .cin-gradient-1 {
+      background: radial-gradient(circle, rgba(200,181,96,0.25) 0%, transparent 70%);
+      top: 20%;
+      left: 15%;
+      animation: cin-glow-1 9s ease-in-out forwards;
+    }
+
+    .cin-gradient-2 {
+      background: radial-gradient(circle, rgba(200,181,96,0.15) 0%, transparent 70%);
+      bottom: 10%;
+      right: 10%;
+      animation: cin-glow-2 9s ease-in-out 1.5s forwards;
+    }
+
+    @keyframes cin-glow-1 {
+      0%   { opacity: 0; transform: scale(0.8); }
+      25%  { opacity: 1; }
+      60%  { opacity: 0.6; transform: scale(1.1) translate(5%, -3%); }
+      100% { opacity: 0; transform: scale(1.3) translate(10%, -5%); }
+    }
+
+    @keyframes cin-glow-2 {
+      0%   { opacity: 0; transform: scale(0.8); }
+      30%  { opacity: 0.8; }
+      65%  { opacity: 0.5; transform: scale(1.2) translate(-5%, 3%); }
+      100% { opacity: 0; transform: scale(1.4); }
+    }
+
+    .cin-globe {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .cin-text {
+      position: absolute;
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+      opacity: 0;
+      padding: 0 2rem;
+      z-index: 2;
+    }
+
+    .cin-text-1 {
+      font-size: clamp(1.4rem, 4vw, 2.4rem);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text);
+    }
+
+    .cin-text-2 {
+      font-size: clamp(1.4rem, 4vw, 2.4rem);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--accent);
+    }
+
+    .cin-text-3 {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .cin-text-3 span {
+      font-size: clamp(1.6rem, 5vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .cin-logo {
+      width: 160px;
+      height: 160px;
+      object-fit: cover;
+      object-position: 63% 48%;
+      border-radius: 50%;
+      border: 2px solid rgba(200,181,96,0.4);
+      transform: scale(1.25);
+    }
+
+    .cin-skip {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      z-index: 3;
+      background: none;
+      border: 1px solid rgba(200,181,96,0.3);
+      color: var(--text-muted);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      line-height: 1;
+    }
+
+    .cin-skip:hover {
+      border-color: var(--accent);
+      color: var(--text);
+      background: rgba(200,181,96,0.1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cin-overlay { display: none; }
+    }
+
     /* ── Fade-in animation ── */
     .fade-in {
       opacity: 0;
@@ -567,6 +732,22 @@
 </head>
 <body>
   <div class="topo-bg"></div>
+
+  <!-- Cinematic Intro Overlay -->
+  <div class="cin-overlay" id="cinOverlay">
+    <button class="cin-skip" id="cinSkip" aria-label="Skip intro">&times;</button>
+    <div class="cin-bg-layers">
+      <div class="cin-grid"></div>
+      <div class="cin-gradient cin-gradient-1"></div>
+      <div class="cin-gradient cin-gradient-2"></div>
+    </div>
+    <canvas id="cinGlobe" class="cin-globe"></canvas>
+    <div class="cin-text cin-text-1">Your data has a story.</div>
+    <div class="cin-text cin-text-2">We help you see it.</div>
+    <div class="cin-text cin-text-3">
+      <img src="images/Logo.png" alt="Klein Meridian" class="cin-logo">
+    </div>
+  </div>
 
   <!-- Nav -->
   <nav>
@@ -744,6 +925,159 @@
   
 
   <script>
+    // ── Cinematic Intro ──
+    (function() {
+      var overlay = document.getElementById('cinOverlay');
+      if (!overlay) return;
+
+      var TOTAL = 9800;
+      var start = Date.now();
+      var stopped = false;
+
+      var canvas = document.getElementById('cinGlobe');
+      var ctx = canvas ? canvas.getContext('2d') : null;
+      // Use a large canvas for crisp rendering at all zoom levels
+      var canvasSize = Math.max(window.innerWidth, window.innerHeight) * 1.5;
+      canvasSize = Math.max(800, Math.min(canvasSize, 2000));
+      if (canvas) {
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = canvasSize * dpr;
+        canvas.height = canvasSize * dpr;
+        canvas.style.width = canvasSize + 'px';
+        canvas.style.height = canvasSize + 'px';
+        ctx.scale(dpr, dpr);
+      }
+
+      var baseR = canvasSize * 0.18; // Starting radius
+      var ctr = canvasSize / 2;
+      var rot = 0;
+
+      var txt1 = overlay.querySelector('.cin-text-1');
+      var txt2 = overlay.querySelector('.cin-text-2');
+      var txt3 = overlay.querySelector('.cin-text-3');
+
+      function ease(t) { return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; }
+
+      function drawGlobe(R, alpha, lineW) {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, canvasSize, canvasSize);
+
+        ctx.strokeStyle = 'rgba(200,181,96,' + alpha + ')';
+        ctx.lineWidth = lineW;
+        for (var lat = -75; lat <= 75; lat += 25) {
+          var lr = lat * Math.PI / 180;
+          var r = R * Math.cos(lr);
+          var y = ctr - R * Math.sin(lr);
+          ctx.beginPath();
+          ctx.ellipse(ctr, y, r, r * 0.3, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        ctx.strokeStyle = 'rgba(200,181,96,' + Math.min(alpha * 2, 0.7) + ')';
+        ctx.lineWidth = lineW * 1.5;
+        ctx.beginPath();
+        ctx.ellipse(ctr, ctr, R, R * 0.3, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(200,181,96,' + alpha + ')';
+        ctx.lineWidth = lineW;
+        for (var lon = 0; lon < 180; lon += 25) {
+          var lr2 = (lon + rot) * Math.PI / 180;
+          var rx = R * Math.cos(lr2);
+          ctx.beginPath();
+          ctx.ellipse(ctr, ctr, Math.abs(rx), R, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        ctx.strokeStyle = 'rgba(200,181,96,' + Math.min(alpha * 2.5, 0.8) + ')';
+        ctx.lineWidth = lineW * 1.8;
+        ctx.beginPath();
+        ctx.arc(ctr, ctr, R, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      function lerp(a, b, t) { return a + (b - a) * Math.max(0, Math.min(1, t)); }
+
+      function frame() {
+        if (stopped) return;
+        var t = (Date.now() - start) / 1000;
+
+        // ── Globe spin speed: slow → fast ──
+        var speed;
+        if (t < 1.5) speed = 0.2;
+        else if (t < 4) speed = lerp(0.2, 1.5, (t - 1.5) / 2.5);
+        else if (t < 6.5) speed = lerp(1.5, 5, (t - 4) / 2.5);
+        else speed = lerp(5, 8, (t - 6.5) / 2);
+        rot += speed;
+
+        // ── Globe opacity ──
+        var alpha;
+        if (t < 0.8) alpha = lerp(0, 0.3, t / 0.8);
+        else if (t < 6) alpha = 0.3;
+        else if (t < 7.5) alpha = lerp(0.3, 0, (t - 6) / 1.5);
+        else alpha = 0;
+
+        // ── Globe zoom via radius (stays crisp) ──
+        var R;
+        if (t < 4) R = baseR;
+        else if (t < 7.5) R = lerp(baseR, canvasSize * 0.8, ease((t - 4) / 3.5));
+        else R = canvasSize * 0.8;
+
+        drawGlobe(R, alpha, 0.8 + (R / baseR) * 0.2);
+
+        // ── Text 1: "Your data has a story." (0.5s - 3s) ──
+        if (t < 0.5) txt1.style.opacity = 0;
+        else if (t < 1.2) { txt1.style.opacity = lerp(0, 1, (t - 0.5) / 0.7); txt1.style.transform = 'translateY(' + lerp(12, 0, (t - 0.5) / 0.7) + 'px)'; }
+        else if (t < 2.5) { txt1.style.opacity = 1; txt1.style.transform = 'translateY(0)'; }
+        else if (t < 3.2) { txt1.style.opacity = lerp(1, 0, (t - 2.5) / 0.7); txt1.style.transform = 'translateY(' + lerp(0, -8, (t - 2.5) / 0.7) + 'px)'; }
+        else txt1.style.opacity = 0;
+
+        // ── Text 2: "We help you see it." (3.2s - 6s) ──
+        if (t < 3.2) txt2.style.opacity = 0;
+        else if (t < 3.9) { txt2.style.opacity = lerp(0, 1, (t - 3.2) / 0.7); txt2.style.transform = 'translateY(' + lerp(12, 0, (t - 3.2) / 0.7) + 'px)'; }
+        else if (t < 5.5) { txt2.style.opacity = 1; txt2.style.transform = 'translateY(0)'; }
+        else if (t < 6.2) { txt2.style.opacity = lerp(1, 0, (t - 5.5) / 0.7); txt2.style.transform = 'translateY(' + lerp(0, -8, (t - 5.5) / 0.7) + 'px)'; }
+        else txt2.style.opacity = 0;
+
+        // ── Text 3: Logo + "Klein Meridian" (7s - 9.2s) ──
+        if (t < 7) txt3.style.opacity = 0;
+        else if (t < 7.8) { txt3.style.opacity = lerp(0, 1, (t - 7) / 0.8); txt3.style.transform = 'translateY(' + lerp(12, 0, (t - 7) / 0.8) + 'px)'; }
+        else if (t < 8.8) { txt3.style.opacity = 1; txt3.style.transform = 'translateY(0)'; }
+        else if (t < 9.4) { txt3.style.opacity = lerp(1, 0, (t - 8.8) / 0.6); }
+        else txt3.style.opacity = 0;
+
+        requestAnimationFrame(frame);
+      }
+
+      requestAnimationFrame(frame);
+
+      setTimeout(function() {
+        stopped = true;
+        overlay.classList.add('done');
+      }, TOTAL);
+
+      overlay.addEventListener('transitionend', function(e) {
+        if (e.target === overlay && overlay.classList.contains('done')) {
+          overlay.classList.add('removed');
+          // Reset for next visit
+          overlay.classList.remove('done');
+          if (canvas) canvas.style.transform = 'translate(-50%, -50%) scale(1)';
+          txt1.style.opacity = 0;
+          txt2.style.opacity = 0;
+          txt3.style.opacity = 0;
+        }
+      });
+
+      function skip() {
+        stopped = true;
+        overlay.classList.add('done');
+        document.removeEventListener('keydown', skip);
+      }
+      var skipBtn = document.getElementById('cinSkip');
+      if (skipBtn) skipBtn.addEventListener('click', skip);
+      document.addEventListener('keydown', skip);
+    })();
+
     // Intersection Observer for fade-in animations
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry, i) => {
