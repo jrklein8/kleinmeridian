@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /wilkerson-map/
 
 Sitemap: https://kleinmeridian.com/sitemap.xml

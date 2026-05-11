@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Wilkerson Homes — Community Proximity Map</title>
+<link rel="icon" type="image/png" href="assets/Proximity%20Map%20-%20Simple.png" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* === Wilkerson Homes brand palette (pulled from wilkersonhomesinc.com) ===
+     Teal:   #76b3b8  (logo)
+     Gold:   #dab844  (phone/accents)  Muted gold: #c2a43b
+     Cream:  #f4e3b9  (panel bg)      Warm white: #fafaf9
+     Brown:  #8f6f3a  (stat banner)
+     Slate:  #37494d  (dark section)
+     Body:   #7b8c89  Text: #2a2a2a
+  */
+  :root {
+    --teal: #76b3b8;
+    --teal-dark: #4d8f94;
+    --teal-darker: #37494d;
+    --gold: #dab844;
+    --gold-muted: #c2a43b;
+    --gold-soft: #f4e3b9;
+    --brown: #8f6f3a;
+    --brown-light: #b48b4f;
+    --cream: #fafaf9;
+    --cream-warm: #fcfbf9;
+    --border: #e5dcc6;
+    --border-soft: #efe8d5;
+    --text: #2a2a2a;
+    --text-soft: #5b6760;
+    --muted: #7b8c89;
+
+    /* Category colors — tuned to the brand, not primaries */
+    --c-community: #c2a43b;   /* gold */
+    --c-military: #37494d;    /* slate */
+    --c-medical: #b8464a;     /* brick red */
+    --c-college: #76b3b8;     /* teal */
+    --c-shopping: #8f6f3a;    /* brown */
+    --c-hub: #d28a3a;         /* amber */
+
+    --shadow: 0 2px 10px rgba(55, 73, 77, 0.08);
+    --shadow-lg: 0 8px 24px rgba(55, 73, 77, 0.14);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--cream); color: var(--text); -webkit-font-smoothing: antialiased; }
+
+  /* --- Embed-friendly wrapper: fills whatever the iframe gives us --- */
+  .app { position: relative; width: 100%; height: 100%; min-height: 420px; display: grid; grid-template-columns: 320px 1fr; background: var(--cream); }
+
+  /* --- Sidebar --- */
+  .sidebar { background: var(--cream-warm); border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; }
+  .sidebar::-webkit-scrollbar { width: 8px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .header { padding: 20px 22px 18px; background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); color: white; position: relative; overflow: hidden; flex-shrink: 0; }
+  .header::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 120% -20%, rgba(218, 184, 68, 0.22) 0%, transparent 55%); }
+  .brand { font-size: 10px; letter-spacing: 3px; color: var(--gold-soft); text-transform: uppercase; font-weight: 700; margin-bottom: 8px; position: relative; z-index: 1; }
+  .header h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; font-weight: 800; line-height: 1.2; margin-bottom: 5px; position: relative; z-index: 1; letter-spacing: 0.3px; }
+  .header .sub { font-size: 12px; color: rgba(255, 255, 255, 0.88); position: relative; z-index: 1; font-weight: 400; }
+  .tagline { position: relative; z-index: 1; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(244, 227, 185, 0.3); font-family: 'Playfair Display', serif; font-size: 13px; font-style: italic; color: var(--gold-soft); }
+
+  .section { padding: 16px 22px; border-bottom: 1px solid var(--border-soft); }
+  .section h2 { font-size: 10px; letter-spacing: 2px; color: var(--teal-darker); text-transform: uppercase; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .section h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .community-card { background: white; border: 1px solid var(--border-soft); border-left: 4px solid var(--c-community); border-radius: 6px; padding: 9px 32px 9px 13px; margin-bottom: 5px; cursor: pointer; transition: all 0.15s; box-shadow: var(--shadow); position: relative; }
+  .community-card:hover { border-left-color: var(--teal); background: var(--cream-warm); }
+  .community-card .name { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 14px; color: var(--teal-darker); display: flex; align-items: center; gap: 6px; line-height: 1.3; }
+  .community-card .name::before { content: ''; width: 13px; height: 12px; background: url('assets/Proximity%20Map%20-%20Simple.png') no-repeat center / contain; flex-shrink: 0; }
+  .community-card .chevron { position: absolute; top: 50%; right: 10px; width: 12px; height: 12px; transform: translateY(-50%) rotate(0deg); transition: transform 0.2s; color: var(--text-soft); flex-shrink: 0; }
+  .community-card.expanded .chevron { transform: translateY(-50%) rotate(180deg); }
+  .community-card .details { max-height: 0; overflow: hidden; transition: max-height 0.25s ease, margin 0.25s ease, padding 0.25s ease; }
+  .community-card.expanded .details { max-height: 200px; padding-top: 8px; margin-top: 7px; border-top: 1px dashed var(--border); }
+  .community-card .meta { font-size: 11.5px; color: var(--gold-muted); font-weight: 700; line-height: 1.4; }
+  .community-card .addr { font-size: 11px; color: var(--text-soft); line-height: 1.4; margin-top: 3px; }
+  .view-map-btn { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; padding: 5px 10px; background: var(--teal); color: white; border: none; border-radius: 4px; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .view-map-btn:hover { background: var(--teal-dark); transform: translateY(-1px); }
+  .community-card.unmapped { border-left-color: var(--border); background: var(--cream); }
+  .community-card.unmapped:hover { border-left-color: var(--gold-muted); }
+  .community-card.unmapped .name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .community-card.unmapped .name::before { opacity: 0.35; filter: grayscale(0.6); }
+  .town-group { margin-bottom: 8px; }
+  .town-group:last-child { margin-bottom: 0; }
+  .region-header { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; box-shadow: var(--shadow); transition: all 0.15s; }
+  .region-header:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+  .region-header.active { background: linear-gradient(135deg, var(--gold) 0%, var(--gold-muted) 100%); color: var(--teal-darker); }
+  .region-header-title { display: flex; align-items: center; gap: 8px; }
+  .region-header-name { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 800; letter-spacing: 0.3px; }
+  .region-header-count { background: rgba(255, 255, 255, 0.25); color: white; padding: 2px 8px; border-radius: 10px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; }
+  .region-header.active .region-header-count { background: rgba(55, 73, 77, 0.2); color: var(--teal-darker); }
+  .region-header-chevron { width: 14px; height: 14px; transition: transform 0.25s; }
+  .region-header.active .region-header-chevron { transform: rotate(180deg); }
+  .region-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 4px; }
+  .town-group.expanded .region-body { max-height: 1400px; padding-top: 6px; }
+
+  /* Back-to-regions control on the map */
+  .back-to-regions { position: absolute; top: 12px; left: 60px; z-index: 500; background: white; border: 1px solid var(--border); border-radius: 6px; padding: 7px 12px 7px 10px; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 600; color: var(--teal-darker); cursor: pointer; box-shadow: var(--shadow-lg); display: none; align-items: center; gap: 5px; transition: all 0.15s; }
+  .back-to-regions:hover { background: var(--cream); }
+  .back-to-regions.show { display: inline-flex; }
+  .back-to-regions svg { width: 14px; height: 14px; }
+
+  .hero-stat { background: linear-gradient(135deg, var(--gold) 0%, var(--gold-muted) 100%); color: var(--teal-darker); padding: 12px 14px; border-radius: 6px; margin-top: 12px; font-size: 12px; font-weight: 500; line-height: 1.45; box-shadow: var(--shadow); }
+  .hero-stat strong { font-family: 'Playfair Display', serif; font-weight: 800; font-size: 17px; display: block; margin-bottom: 2px; color: var(--teal-darker); }
+
+  .layer-toggle { display: flex; align-items: center; gap: 10px; padding: 8px 11px; margin-bottom: 5px; background: white; border: 1px solid var(--border-soft); border-radius: 6px; cursor: pointer; transition: all 0.15s; font-size: 12.5px; font-weight: 500; }
+  .layer-toggle:hover { background: var(--cream); border-color: var(--teal); }
+  .layer-toggle.off { opacity: 0.4; }
+  .layer-toggle input { accent-color: var(--teal); }
+  .swatch { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; border: 2px solid white; box-shadow: 0 0 0 1px rgba(0,0,0,0.15), 0 1px 3px rgba(55, 73, 77, 0.18); display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 11px; line-height: 1; font-family: 'Poppins', sans-serif; }
+  .swatch-logo { width: 26px; height: 24px; flex-shrink: 0; background: url('assets/Proximity%20Map%20-%20Simple.png') no-repeat center / contain; filter: drop-shadow(0 1px 2px rgba(55, 73, 77, 0.25)); }
+  .layer-toggle .count { margin-left: auto; font-size: 10px; color: var(--text-soft); font-weight: 600; background: var(--cream); padding: 2px 7px; border-radius: 10px; border: 1px solid var(--border-soft); }
+
+  .ring-controls { display: flex; gap: 5px; }
+  .ring-btn { flex: 1; padding: 7px 8px; background: white; border: 1px solid var(--border); color: var(--text-soft); border-radius: 5px; cursor: pointer; font-size: 11.5px; font-weight: 600; font-family: 'Poppins', sans-serif; transition: all 0.15s; }
+  .ring-btn:hover { background: var(--cream); border-color: var(--teal); }
+  .ring-btn.active { background: var(--teal); color: white; border-color: var(--teal-dark); }
+
+  .footer { margin-top: auto; padding: 12px 22px; border-top: 1px solid var(--border-soft); font-size: 10.5px; color: var(--muted); background: var(--cream); line-height: 1.5; }
+  .footer strong { color: var(--teal-darker); }
+
+  /* --- Map --- */
+  .map-container { position: relative; min-width: 0; }
+  #map { width: 100%; height: 100%; background: #e6ece4; }
+
+  /* Community pin with region-colored halo */
+  .wilkerson-pin-wrapper { background: transparent; border: none; }
+  .wilkerson-pin { position: relative; width: 56px; height: 52px; }
+  .wilkerson-pin img { width: 56px; height: 52px; display: block; filter: drop-shadow(0 0 5px var(--accent, rgba(0,0,0,0))) drop-shadow(0 0 2px var(--accent, rgba(0,0,0,0))) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25)); }
+
+  /* Region pill markers on the map */
+  .region-marker { background: transparent; border: none; }
+  .region-pill { display: inline-flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.15s; }
+  .region-pill:hover { transform: translateY(-2px); }
+  .region-pill-body { background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); color: white; padding: 7px 14px 6px; border-radius: 22px; display: flex; align-items: center; gap: 7px; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 700; box-shadow: 0 4px 12px rgba(55, 73, 77, 0.45); border: 2.5px solid var(--accent, white); white-space: nowrap; }
+  .region-pill-count { background: var(--gold); color: var(--teal-darker); padding: 1px 7px; border-radius: 10px; font-size: 10.5px; font-weight: 700; }
+  .region-pill-tip { width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 8px solid var(--accent, white); margin-top: -1px; filter: drop-shadow(0 2px 2px rgba(55, 73, 77, 0.3)); }
+
+  /* Help button — top-right corner */
+  .help-btn { position: absolute; top: 12px; right: 12px; z-index: 600; width: 34px; height: 34px; background: white; border: 1px solid var(--border); border-radius: 50%; cursor: pointer; box-shadow: var(--shadow-lg); display: flex; align-items: center; justify-content: center; color: var(--teal-darker); font-family: 'Playfair Display', serif; font-weight: 700; font-size: 16px; transition: all 0.15s; }
+  .help-btn:hover { background: var(--teal); color: white; border-color: var(--teal-dark); transform: scale(1.05); }
+  .help-btn.pulse::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--teal); opacity: 0; animation: pulse 2s ease-out infinite; }
+  @keyframes pulse { 0% { opacity: 0.7; transform: scale(1); } 100% { opacity: 0; transform: scale(1.5); } }
+
+  /* Sidebar toggle button (visible on narrow / embed) — sits below Leaflet zoom */
+  .sidebar-toggle { position: absolute; top: 90px; left: 10px; z-index: 600; width: 30px; height: 30px; background: white; border: 2px solid rgba(0,0,0,0.2); border-radius: 4px; cursor: pointer; box-shadow: var(--shadow-lg); display: none; align-items: center; justify-content: center; color: var(--teal-darker); }
+
+  /* Sidebar collapse/close button (mobile only, lives inside the sidebar) */
+  .sidebar-close { display: none; position: absolute; top: 12px; right: 12px; z-index: 10; width: 32px; height: 32px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.35); backdrop-filter: blur(4px); border-radius: 50%; cursor: pointer; align-items: center; justify-content: center; color: white; transition: all 0.15s; }
+  .sidebar-close:hover { background: rgba(255, 255, 255, 0.35); transform: scale(1.05); }
+  .sidebar-close svg { width: 16px; height: 16px; }
+  .sidebar-toggle:hover { background: var(--cream); }
+  .sidebar-toggle svg { width: 18px; height: 18px; }
+
+  .map-title { position: absolute; top: 12px; right: 56px; z-index: 400; background: white; padding: 9px 13px; border-radius: 6px; border: 1px solid var(--border); font-size: 11.5px; color: var(--text-soft); pointer-events: none; box-shadow: var(--shadow); font-weight: 500; }
+  .map-title strong { color: var(--teal-darker); font-weight: 700; }
+
+  /* Mobile/compact floating mini legend — always visible on small screens */
+  .mobile-legend { display: none; position: absolute; bottom: 26px; left: 10px; right: 10px; z-index: 450; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(6px); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; box-shadow: var(--shadow-lg); overflow-x: auto; white-space: nowrap; font-size: 10.5px; -webkit-overflow-scrolling: touch; }
+  .mobile-legend::-webkit-scrollbar { height: 0; }
+  .mobile-legend-item { display: inline-flex; align-items: center; gap: 5px; padding-right: 14px; font-weight: 600; color: var(--text-soft); }
+  .mobile-legend-item:last-child { padding-right: 0; }
+  .mobile-legend-item .mini-icon { width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 10px; border: 1.5px solid white; box-shadow: 0 0 0 1px rgba(0,0,0,0.15); flex-shrink: 0; }
+  .mobile-legend-item .mini-logo { width: 22px; height: 20px; background: url('assets/Proximity%20Map%20-%20Simple.png') no-repeat center / contain; border: none; box-shadow: none; border-radius: 0; filter: drop-shadow(0 1px 1px rgba(55, 73, 77, 0.3)); }
+
+  /* --- Popups --- */
+  .leaflet-popup-content-wrapper { background: white; color: var(--text); border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(55, 73, 77, 0.18); }
+  .leaflet-popup-tip { background: white; border: 1px solid var(--border); }
+  .leaflet-popup-content { margin: 12px 14px; font-size: 12.5px; line-height: 1.5; font-family: 'Poppins', sans-serif; min-width: 200px; }
+  .leaflet-popup-close-button { color: var(--muted) !important; font-size: 18px !important; padding: 6px 8px !important; }
+  .popup-title { font-family: 'Playfair Display', serif; font-weight: 800; font-size: 15px; margin-bottom: 4px; color: var(--teal-darker); }
+  .popup-type { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .popup-addr { color: var(--text-soft); font-size: 12px; margin-bottom: 8px; }
+  .popup-distances { border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px; font-size: 11px; }
+  .popup-distances-title { font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+  .popup-distances .row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; gap: 8px; }
+  .popup-distances .row span:last-child { color: var(--gold-muted); font-weight: 700; }
+  .popup-distances .row .lbl { display: flex; align-items: center; gap: 6px; }
+  .popup-chip { width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 9px; border: 1.5px solid white; box-shadow: 0 0 0 1px rgba(0,0,0,0.12); flex-shrink: 0; }
+  .popup-nearby-hint { font-size: 10px; color: var(--muted); margin-top: 6px; font-style: italic; }
+
+  .legend-badge { padding: 3px 8px; border-radius: 10px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px; display: inline-block; }
+  .badge-community { background: #f6ecc7; color: #7a6412; }
+  .badge-military  { background: #dbe2e3; color: #37494d; }
+  .badge-medical   { background: #f4d6d8; color: #7a2225; }
+  .badge-college   { background: #d7ebec; color: #2e5c5f; }
+  .badge-shopping  { background: #e8dbc4; color: #5a4418; }
+  .badge-hub       { background: #f5dcc0; color: #7a3d13; }
+
+  /* --- Leaflet controls --- */
+  .leaflet-control-attribution { background: rgba(255, 255, 255, 0.92) !important; color: var(--text-soft) !important; font-size: 10px; border-radius: 3px; }
+  .leaflet-control-attribution a { color: var(--teal-dark) !important; }
+  .leaflet-control-zoom a { background: white !important; color: var(--teal-darker) !important; border-color: var(--border) !important; font-weight: 700 !important; box-shadow: var(--shadow); }
+  .leaflet-control-zoom a:hover { background: var(--cream) !important; }
+
+  /* --- Responsive / embed modes --- */
+  @media (max-width: 760px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: absolute; top: 0; left: 0; bottom: 0; width: 290px; max-width: 82%; z-index: 1000; transform: translateX(-100%); transition: transform 0.25s; border-right: 1px solid var(--border); box-shadow: var(--shadow-lg); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-toggle { display: flex; }
+    .sidebar-close { display: flex; }
+    .map-title { display: none; }
+    .mobile-legend { display: block; }
+  }
+
+  /* Compact mode — activated via ?compact=1 (good for tight iframe embeds) */
+  .app.compact { grid-template-columns: 1fr; }
+  .app.compact .sidebar { position: absolute; top: 0; left: 0; bottom: 0; width: 290px; max-width: 82%; z-index: 1000; transform: translateX(-100%); transition: transform 0.25s; border-right: 1px solid var(--border); box-shadow: var(--shadow-lg); }
+  .app.compact .sidebar.open { transform: translateX(0); }
+  .app.compact .sidebar-toggle { display: flex; }
+  .app.compact .sidebar-close { display: flex; }
+  .app.compact .mobile-legend { display: block; }
+  .app.compact .map-title { display: none; }
+
+  /* --- Tutorial overlay --- */
+  .tutorial { position: fixed; inset: 0; z-index: 2000; background: rgba(55, 73, 77, 0.55); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.25s; }
+  .tutorial.show { display: flex; opacity: 1; }
+  .tutorial-card { background: white; border-radius: 14px; max-width: 460px; width: 100%; padding: 28px 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); border-top: 5px solid var(--gold); animation: slideUp 0.35s ease-out; }
+  @keyframes slideUp { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .tutorial-logo { display: block; max-width: 140px; height: auto; margin: 0 auto 14px; }
+  .tutorial-brand { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--teal); font-weight: 700; margin-bottom: 4px; }
+  .tutorial-card h2 { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--teal-darker); margin-bottom: 8px; font-weight: 800; }
+  .tutorial-card .intro { color: var(--text-soft); font-size: 13.5px; line-height: 1.55; margin-bottom: 20px; }
+  .tutorial-steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 22px; }
+  .tutorial-step { display: flex; gap: 14px; align-items: flex-start; padding: 12px 14px; background: var(--cream); border-radius: 8px; border: 1px solid var(--border-soft); }
+  .tutorial-step-icon { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 14px; border: 2.5px solid white; box-shadow: 0 0 0 1px rgba(0,0,0,0.1), 0 2px 6px rgba(55,73,77,0.15); }
+  .tutorial-step-body { flex: 1; font-size: 13px; color: var(--text); line-height: 1.5; }
+  .tutorial-step-body strong { color: var(--teal-darker); font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 800; display: block; margin-bottom: 2px; }
+  .tutorial-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .tutorial-close { flex: 1; padding: 12px 20px; background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); color: white; border: none; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.15s; box-shadow: var(--shadow); }
+  .tutorial-close:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+  .tutorial-dontshow { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+  .tutorial-dontshow input { accent-color: var(--teal); }
+
+  /* Backdrop when sidebar open on mobile/compact */
+  .sidebar-backdrop { display: none; position: absolute; inset: 0; z-index: 999; background: rgba(55, 73, 77, 0.35); opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+  .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+  @media (max-width: 760px) { .sidebar-backdrop { display: block; } }
+  .app.compact .sidebar-backdrop { display: block; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-close" id="sidebarClose" aria-label="Close menu" title="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+    <div class="header">
+      <div class="brand">Wilkerson Homes Inc.</div>
+      <h1>Where We Build</h1>
+      <div class="sub">Southern Maryland · Charles & St. Mary's Counties</div>
+      <div class="tagline">“Come Home to Wilkerson.”</div>
+    </div>
+
+    <div class="section">
+      <h2>Our Communities</h2>
+      <div id="communitiesList"></div>
+      <div class="hero-stat">
+        <strong>22 – 40 miles</strong>
+        to major military bases, federal agencies & the DC metro
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Map Layers</h2>
+      <label class="layer-toggle" data-layer="military">
+        <input type="checkbox" checked />
+        <span class="swatch" style="background: var(--c-military)">★</span>
+        <span>Military & Federal</span>
+        <span class="count">8</span>
+      </label>
+      <label class="layer-toggle" data-layer="medical">
+        <input type="checkbox" checked />
+        <span class="swatch" style="background: var(--c-medical)">+</span>
+        <span>Medical Facilities</span>
+        <span class="count">4</span>
+      </label>
+      <label class="layer-toggle" data-layer="college">
+        <input type="checkbox" checked />
+        <span class="swatch" style="background: var(--c-college)">▲</span>
+        <span>College of Southern MD</span>
+        <span class="count">5</span>
+      </label>
+      <label class="layer-toggle" data-layer="shopping">
+        <input type="checkbox" checked />
+        <span class="swatch" style="background: var(--c-shopping)">●</span>
+        <span>Shopping</span>
+        <span class="count">3</span>
+      </label>
+      <label class="layer-toggle" data-layer="hubs">
+        <input type="checkbox" checked />
+        <span class="swatch" style="background: var(--c-hub)">◆</span>
+        <span>Regional Hubs</span>
+        <span class="count">4</span>
+      </label>
+    </div>
+
+    <div class="section">
+      <h2>Distance Rings</h2>
+      <div class="ring-controls">
+        <button class="ring-btn" data-ring="0">Off</button>
+        <button class="ring-btn" data-ring="10">10 mi</button>
+        <button class="ring-btn active" data-ring="25">25 mi</button>
+        <button class="ring-btn" data-ring="50">50 mi</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      Map by <strong>Klein Meridian Consulting</strong> · Data: OpenStreetMap<br/>
+      Coordinates approximate · For marketing reference only.
+    </div>
+  </aside>
+
+  <div class="map-container">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+        <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>
+      </svg>
+    </button>
+    <div class="map-title"><strong>Interactive Map</strong> · Click any marker</div>
+    <button class="back-to-regions" id="backToRegions" title="Show all regions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      All Regions
+    </button>
+    <button class="help-btn" id="helpBtn" aria-label="How to use this map" title="How to use this map">?</button>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <div id="map"></div>
+    <div class="mobile-legend" id="mobileLegend">
+      <span class="mobile-legend-item"><span class="mini-icon mini-logo"></span>Wilkerson</span>
+      <span class="mobile-legend-item"><span class="mini-icon" style="background:var(--c-military)">★</span>Military</span>
+      <span class="mobile-legend-item"><span class="mini-icon" style="background:var(--c-medical)">+</span>Medical</span>
+      <span class="mobile-legend-item"><span class="mini-icon" style="background:var(--c-college)">▲</span>College</span>
+      <span class="mobile-legend-item"><span class="mini-icon" style="background:var(--c-shopping)">●</span>Shopping</span>
+      <span class="mobile-legend-item"><span class="mini-icon" style="background:var(--c-hub)">◆</span>Hubs</span>
+    </div>
+  </div>
+</div>
+
+<!-- Tutorial overlay -->
+<div class="tutorial" id="tutorial" role="dialog" aria-labelledby="tutorialTitle">
+  <div class="tutorial-card">
+    <div class="tutorial-brand">Wilkerson Homes Inc.</div>
+    <h2 id="tutorialTitle">Find Your Next Home</h2>
+    <p class="intro">Explore the area around our three Southern Maryland communities — see what's nearby before you even visit.</p>
+
+    <div class="tutorial-steps">
+      <div class="tutorial-step">
+        <div class="tutorial-step-icon" style="background: var(--c-community)">W</div>
+        <div class="tutorial-step-body">
+          <strong>Click a Community</strong>
+          See what's within 10, 25, or 50 miles — military bases, medical, colleges, shopping.
+        </div>
+      </div>
+      <div class="tutorial-step">
+        <div class="tutorial-step-icon" style="background: var(--teal)">◎</div>
+        <div class="tutorial-step-body">
+          <strong>Distance Rings</strong>
+          Toggle ring size in the sidebar to visualize your reach from each community.
+        </div>
+      </div>
+      <div class="tutorial-step">
+        <div class="tutorial-step-icon" style="background: var(--gold-muted)">☰</div>
+        <div class="tutorial-step-body">
+          <strong>Filter the Map</strong>
+          Show or hide categories from the sidebar to focus on what matters to you.
+        </div>
+      </div>
+    </div>
+
+    <div class="tutorial-footer">
+      <button class="tutorial-close" id="tutorialClose">Got it — show me the map</button>
+    </div>
+    <label class="tutorial-dontshow" style="margin-top:12px; justify-content:center;">
+      <input type="checkbox" id="tutorialDontShow" checked />
+      Don't show this again
+    </label>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ===== DATA =====
+// All 8 Wilkerson communities — each with approximate coordinates
+const communities = [
+  // HUGHESVILLE
+  { id:"keswick",      name:"Keswick",          town:"Hughesville", addr:"5832 Borrowdale Lane, Hughesville, MD",       coords:[38.5282,-76.7869], lots:"30 Lots", acres:"1 acre each" },
+  { id:"canterleigh",  name:"Canterleigh",      town:"Hughesville", addr:"MD Route 231 & Goode Road, Hughesville, MD",  coords:[38.5482,-76.7600], lots:"2 Lots",  acres:"3 acres each" },
+  // LA PLATA
+  { id:"hollybrook",   name:"Hollybrooke Farm", town:"La Plata",    addr:"9348 Stonestreet Road, La Plata, MD",         coords:[38.4599,-76.9253], lots:"1 Lot",   acres:"3 acres" },
+  // NEWBURG
+  { id:"aspenleigh",   name:"Aspenleigh",       town:"Newburg",     addr:"Aspenleigh Court, Newburg, MD",               coords:[38.3860,-76.9610], lots:"5 Lots",  acres:"1+ acres" },
+  { id:"bunkerhill",   name:"Bunker Hill",      town:"Newburg",     addr:"11260 Bunker Hill Woods Place, Newburg, MD",  coords:[38.40163167139767,-76.96247163558252], lots:"8 Lots",  acres:"3 – 11+ acres" },
+  { id:"cherrygrove",  name:"Cherry Grove",     town:"Newburg",     addr:"Mt. Victoria Road, Newburg, MD",              coords:[38.3673,-76.9127], lots:"1 Lot",   acres:"3 acres" },
+  { id:"theglebe",     name:"The Glebe",        town:"Newburg",     addr:"13205 Glebe Place, Newburg, MD",              coords:[38.3487,-76.9071], lots:"1 Lot",   acres:"3 acres" },
+  { id:"lostoak",      name:"Lost Oak",         town:"Newburg",     addr:"Edge Hill Road, Newburg, MD",                 coords:[38.3920,-76.9600], lots:"1 Lot",   acres:"3 acres" }
+];
+
+// Region / town display order
+const townOrder = ["Hughesville", "La Plata", "Newburg"];
+
+// Soft per-region accent colors (ring + pin edge + pill border)
+const regionColors = {
+  "Hughesville": "#96a37a",  // muted olive green
+  "La Plata":    "#7fa0c0",  // soft slate blue
+  "Newburg":     "#c89476"   // warm terracotta
+};
+
+// Build region data (centroid + bounds) from communities
+const regions = {};
+townOrder.forEach(t => { regions[t] = { name: t, communities: [], latSum: 0, lngSum: 0, color: regionColors[t] }; });
+communities.forEach(c => {
+  const r = regions[c.town];
+  if (!r) return;
+  r.communities.push(c);
+  r.latSum += c.coords[0];
+  r.lngSum += c.coords[1];
+});
+Object.values(regions).forEach(r => {
+  const n = r.communities.length;
+  r.centroid = [r.latSum / n, r.lngSum / n];
+  r.totalLots = r.communities.reduce((s, c) => s + (parseInt(c.lots) || 0), 0);
+});
+const military = [
+  { name:"NAS Patuxent River (NAVAIR)",    addr:"Lexington Park, MD",                coords:[38.28611,-76.41167] },
+  { name:"Indian Head Naval Support Fac.", addr:"Naval Ctr for Energetics / Stump Neck", coords:[38.58858,-77.16920] },
+  { name:"NSF Dahlgren",                   addr:"King George, VA",                   coords:[38.32500,-77.03333] },
+  { name:"Joint Base Andrews",             addr:"1832 Robert M Bond Dr, MD 20762",   coords:[38.81080,-76.86700] },
+  { name:"Joint Base Anacostia-Bolling",   addr:"Washington, DC",                    coords:[38.842777,-77.01611] },
+  { name:"The Pentagon",                   addr:"Arlington, VA",                     coords:[38.870834,-77.055] },
+  { name:"NOAA Headquarters",              addr:"Silver Spring, MD",                 coords:[38.9907,-77.0353] },
+  { name:"US Census Bureau",               addr:"4600 Silver Hill Rd, Suitland, MD", coords:[38.8461,-76.9269] }
+];
+const medical = [
+  { name:"UMd Charles Regional Medical Ctr",    addr:"5 Garrett Ave, La Plata, MD",  coords:[38.5304,-76.9744] },
+  { name:"MedStar Southern Maryland Hospital",  addr:"7503 Surratts Rd, Clinton, MD", coords:[38.7579,-76.8894] },
+  { name:"Calvert Memorial Hospital",           addr:"Prince Frederick, MD",          coords:[38.5401,-76.5866] },
+  { name:"Charlotte Hall Veterans Home",        addr:"29449 Charlotte Hall Rd, MD",   coords:[38.4822,-76.7811] }
+];
+const college = [
+  { name:"CSM – Ctr for Transportation Training", addr:"5825 Radio Station Rd, La Plata", coords:[38.5401,-76.9783] },
+  { name:"CSM – Velocity Center Indian Head",     addr:"4465 Indian Head Hwy",             coords:[38.5986,-77.1586] },
+  { name:"CSM – La Plata / Hughesville Campus",   addr:"8730 Mitchell Rd, La Plata",       coords:[38.5336,-76.9964] },
+  { name:"CSM – Leonardtown Campus",              addr:"22950 Hollywood Rd",               coords:[38.3015,-76.6342] },
+  { name:"CSM – Prince Frederick Campus",         addr:"115 J.W. Williams Rd",             coords:[38.5390,-76.5885] }
+];
+const shopping = [
+  { name:"The Shops at Waldorf",       addr:"2983 Festival Way, Waldorf, MD",        coords:[38.6248,-76.9126] },
+  { name:"Starbucks (Charlotte Hall)", addr:"30015 Three Notch Rd, Charlotte Hall",  coords:[38.4767,-76.7814] },
+  { name:"Weis Market",                addr:"30015 Three Notch Rd, Charlotte Hall",  coords:[38.4770,-76.7800] }
+];
+const hubs = [
+  { name:"Washington, D.C.", addr:"Federal District",  coords:[38.9072,-77.0369] },
+  { name:"Waldorf, MD",      addr:"Main regional hub", coords:[38.6245,-76.9289] },
+  { name:"Bowie, MD",        addr:"",                  coords:[38.9428,-76.7300] },
+  { name:"Annapolis, MD",    addr:"State capital",     coords:[38.9784,-76.4922] }
+];
+
+// ===== EMBED / COMPACT MODE =====
+const params = new URLSearchParams(window.location.search);
+if (params.get('compact') === '1') document.getElementById('app').classList.add('compact');
+
+// ===== MAP =====
+const map = L.map('map', { center:[38.65,-76.85], zoom:9, zoomControl:true });
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  attribution:'© OpenStreetMap © CARTO', subdomains:'abcd', maxZoom:19
+}).addTo(map);
+
+// ===== ICONS (brand-colored) =====
+function makeIcon(color, opts = {}) {
+  const { size = 30, symbol = '', isCommunity = false } = opts;
+  const halo = isCommunity
+    ? `<circle cx="20" cy="20" r="18" fill="${color}" opacity="0.18"/>
+       <circle cx="20" cy="20" r="18" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.7"/>`
+    : '';
+  const id = 's' + color.replace('#','');
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="${size}" height="${size}">
+      <defs><filter id="${id}" x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-opacity="0.32"/>
+      </filter></defs>
+      ${halo}
+      <circle cx="20" cy="20" r="${isCommunity ? 13 : 11}" fill="${color}" stroke="#fff" stroke-width="2.8" filter="url(#${id})"/>
+      ${symbol ? `<text x="20" y="${isCommunity ? 25 : 24}" text-anchor="middle" font-size="${isCommunity ? 14 : 12}" font-weight="800" fill="#fff" font-family="Poppins, Arial">${symbol}</text>` : ''}
+    </svg>`;
+  return L.divIcon({ className:'custom-marker', html:svg, iconSize:[size,size], iconAnchor:[size/2,size/2], popupAnchor:[0,-size/2+2] });
+}
+// Wilkerson logo pin — factory that accepts a region-accent color for the glow
+function makeWilkersonPin(accentColor) {
+  const html = `<div class="wilkerson-pin" style="--accent: ${accentColor}">
+    <img src="assets/Proximity%20Map%20-%20Simple.png" alt="Wilkerson Homes" />
+  </div>`;
+  return L.divIcon({
+    className: 'wilkerson-pin-wrapper',
+    html,
+    iconSize: [56, 52],
+    iconAnchor: [14, 52],
+    popupAnchor: [14, -44]
+  });
+}
+
+const icons = {
+  // Per-region community pin icons with matching accent colors
+  community: Object.fromEntries(
+    Object.entries(regionColors).map(([town, color]) => [town, makeWilkersonPin(color)])
+  ),
+  military:  makeIcon('#37494d', { size:30, symbol:'★' }),
+  medical:   makeIcon('#b8464a', { size:28, symbol:'+' }),
+  college:   makeIcon('#76b3b8', { size:26, symbol:'▲' }),
+  shopping:  makeIcon('#8f6f3a', { size:26, symbol:'●' }),
+  hub:       makeIcon('#d28a3a', { size:32, symbol:'◆' })
+};
+
+// ===== UTIL =====
+function haversineMiles(a,b){
+  const toRad = d => d*Math.PI/180, R=3958.8;
+  const dLat=toRad(b[0]-a[0]), dLon=toRad(b[1]-a[1]);
+  const h=Math.sin(dLat/2)**2 + Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]))*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+function distanceBlock(coords){
+  const d = communities.map(c => ({ name:c.name, miles:haversineMiles(coords, c.coords) }));
+  return `<div class="popup-distances">
+    <div class="popup-distances-title">Distance to Wilkerson Communities</div>
+    ${d.map(x => `<div class="row"><span>${x.name}</span><span>${x.miles.toFixed(1)} mi</span></div>`).join('')}
+  </div>`;
+}
+function popupHtml(item, badgeClass, typeLabel){
+  return `
+    <div class="popup-title">${item.name}</div>
+    <div class="popup-type"><span class="legend-badge ${badgeClass}">${typeLabel}</span></div>
+    ${item.addr ? `<div class="popup-addr">${item.addr}</div>` : ''}
+    ${distanceBlock(item.coords)}
+  `;
+}
+
+// ===== LAYERS =====
+const layers = { communities:L.layerGroup(), military:L.layerGroup(), medical:L.layerGroup(), college:L.layerGroup(), shopping:L.layerGroup(), hubs:L.layerGroup(), rings:L.layerGroup() };
+
+let currentRing = 25;
+
+// Category metadata — used for within-ring breakdowns
+const categoryMeta = [
+  { key:'military', label:'Military & Federal', icon:'★', color:'var(--c-military)', items: military },
+  { key:'medical',  label:'Medical',            icon:'+', color:'var(--c-medical)',  items: medical },
+  { key:'college',  label:'CSM Campuses',       icon:'▲', color:'var(--c-college)',  items: college },
+  { key:'shopping', label:'Shopping',           icon:'●', color:'var(--c-shopping)', items: shopping },
+  { key:'hubs',     label:'Regional Hubs',      icon:'◆', color:'var(--c-hub)',      items: hubs }
+];
+
+function nearbyBreakdown(center, miles) {
+  return categoryMeta.map(cat => ({
+    ...cat,
+    count: cat.items.filter(i => haversineMiles(center, i.coords) <= miles).length
+  }));
+}
+
+function communityPopupHtml(c) {
+  const miles = currentRing || 25;
+  const breakdown = nearbyBreakdown(c.coords, miles);
+  const rows = breakdown.map(cat => `
+    <div class="row">
+      <span class="lbl"><span class="popup-chip" style="background:${cat.color}">${cat.icon}</span> ${cat.label}</span>
+      <span>${cat.count}</span>
+    </div>`).join('');
+  const hint = currentRing ? '' : '<div class="popup-nearby-hint">Showing 25-mile default — toggle rings to adjust</div>';
+  const meta = [c.lots, c.acres].filter(Boolean).join(' · ');
+  return `
+    <div class="popup-title">${c.name}</div>
+    <div class="popup-type"><span class="legend-badge badge-community">Wilkerson Community · ${c.town}</span></div>
+    ${meta ? `<div style="font-size:12px; color:var(--gold-muted); font-weight:700; margin-bottom:4px;">${meta}</div>` : ''}
+    <div class="popup-addr">${c.addr}</div>
+    <div class="popup-distances">
+      <div class="popup-distances-title">Within ${miles} miles</div>
+      ${rows}
+    </div>
+    ${hint}
+  `;
+}
+
+const communityMarkers = communities.map(c => {
+  const icon = icons.community[c.town] || makeWilkersonPin('#c2a43b');
+  const marker = L.marker(c.coords, { icon, zIndexOffset:1000 });
+  marker.communityData = c;
+  marker.bindPopup(communityPopupHtml(c), { minWidth: 230 });
+  return marker;
+});
+
+function refreshCommunityPopups() {
+  communityMarkers.forEach(m => {
+    m.setPopupContent(communityPopupHtml(m.communityData));
+  });
+}
+
+// ===== REGION MARKERS (pill badges shown by default) =====
+function makeRegionIcon(r) {
+  const label = r.communities.length === 1 ? '1 community' : `${r.communities.length} communities`;
+  const html = `<div class="region-pill" style="--accent: ${r.color}">
+    <div class="region-pill-body">
+      <span>${r.name}</span>
+      <span class="region-pill-count">${label}</span>
+    </div>
+    <div class="region-pill-tip"></div>
+  </div>`;
+  return L.divIcon({
+    className: 'region-marker',
+    html,
+    iconSize: [160, 44],
+    iconAnchor: [80, 44],
+    popupAnchor: [0, -44]
+  });
+}
+
+const regionMarkers = {};
+Object.values(regions).forEach(r => {
+  const m = L.marker(r.centroid, { icon: makeRegionIcon(r), zIndexOffset: 800 });
+  m.on('click', () => setActiveRegion(r.name));
+  regionMarkers[r.name] = m;
+});
+
+// ===== ACTIVE REGION STATE =====
+let activeRegion = null;
+
+function setActiveRegion(regionName) {
+  activeRegion = (activeRegion === regionName) ? null : regionName;
+  updateRegionView();
+  updateSidebarRegionState();
+}
+
+function updateRegionView() {
+  // Clear all community + region markers from map
+  Object.values(regionMarkers).forEach(m => map.removeLayer(m));
+  communityMarkers.forEach(m => map.removeLayer(m));
+
+  if (activeRegion) {
+    // Show this region's community markers
+    communityMarkers
+      .filter(m => m.communityData.town === activeRegion)
+      .forEach(m => m.addTo(map));
+    // Show OTHER regions' region pills (so user can jump)
+    Object.entries(regionMarkers).forEach(([name, m]) => {
+      if (name !== activeRegion) m.addTo(map);
+    });
+    // Fly to the active region's bounds
+    const r = regions[activeRegion];
+    const bounds = L.latLngBounds(r.communities.map(c => c.coords)).pad(0.6);
+    map.flyToBounds(bounds, { duration: 0.85, maxZoom: 12 });
+    document.getElementById('backToRegions').classList.add('show');
+  } else {
+    // Default: show all region pills
+    Object.values(regionMarkers).forEach(m => m.addTo(map));
+    document.getElementById('backToRegions').classList.remove('show');
+  }
+  refreshCommunityPopups();
+}
+
+function updateSidebarRegionState() {
+  document.querySelectorAll('.town-group').forEach(tg => {
+    const region = tg.dataset.region;
+    const header = tg.querySelector('.region-header');
+    if (region === activeRegion) {
+      tg.classList.add('expanded');
+      header.classList.add('active');
+    } else {
+      tg.classList.remove('expanded');
+      header.classList.remove('active');
+    }
+  });
+}
+military.forEach(m => L.marker(m.coords, { icon:icons.military }).bindPopup(popupHtml(m,'badge-military','Military / Federal')).addTo(layers.military));
+medical.forEach(m => L.marker(m.coords, { icon:icons.medical  }).bindPopup(popupHtml(m,'badge-medical','Medical')).addTo(layers.medical));
+college.forEach(c => L.marker(c.coords, { icon:icons.college  }).bindPopup(popupHtml(c,'badge-college','College of Southern MD')).addTo(layers.college));
+shopping.forEach(s => L.marker(s.coords,{ icon:icons.shopping }).bindPopup(popupHtml(s,'badge-shopping','Shopping')).addTo(layers.shopping));
+hubs.forEach(h => L.marker(h.coords, { icon:icons.hub       }).bindPopup(popupHtml(h,'badge-hub','Regional Hub')).addTo(layers.hubs));
+
+// Add non-community layers (military, medical, etc.) directly to map
+['military','medical','college','shopping','hubs','rings'].forEach(k => layers[k].addTo(map));
+
+// Kick off with regions view (default: no active region)
+updateRegionView();
+
+// ===== RINGS =====
+function drawRings(miles){
+  layers.rings.clearLayers();
+  if (!miles) return;
+  const meters = miles * 1609.34;
+  // One ring per region centroid, colored to match its community pins
+  Object.values(regions).forEach(r => {
+    L.circle(r.centroid, {
+      radius:meters, color:r.color, weight:1.6, opacity:0.8,
+      fillColor:r.color, fillOpacity:0.05, dashArray:'7,6'
+    }).addTo(layers.rings);
+  });
+}
+drawRings(currentRing);
+
+// ===== UI WIRING =====
+document.querySelectorAll('.layer-toggle').forEach(t => {
+  t.addEventListener('change', () => {
+    const k = t.dataset.layer, on = t.querySelector('input').checked;
+    if (on) { layers[k].addTo(map); t.classList.remove('off'); }
+    else { map.removeLayer(layers[k]); t.classList.add('off'); }
+  });
+});
+document.querySelectorAll('.ring-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.ring-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentRing = parseFloat(btn.dataset.ring);
+    drawRings(currentRing);
+    refreshCommunityPopups();
+  });
+});
+// ===== RENDER COMMUNITY LIST (2-level accordion: Region → Community) =====
+function renderCommunityList() {
+  const container = document.getElementById('communitiesList');
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const chevronSvg = `<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+  const regionChevronSvg = `<svg class="region-header-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+
+  container.innerHTML = townOrder.map(town => {
+    const r = regions[town];
+    if (!r || !r.communities.length) return '';
+    const cardsHtml = r.communities.map(c => {
+      const meta = [c.lots, c.acres].filter(Boolean).join(' · ');
+      const shortAddr = c.addr.replace(/, [A-Z]{2}$/, '').replace(/,\s*[A-Za-z ]+\s*$/, '');
+      return `<div class="community-card" data-zoom="${esc(c.id)}">
+        <div class="name">${esc(c.name)}</div>
+        ${chevronSvg}
+        <div class="details">
+          ${meta ? `<div class="meta">${esc(meta)}</div>` : ''}
+          <div class="addr">${esc(shortAddr)}</div>
+          <button class="view-map-btn" data-action="zoom">View on Map →</button>
+        </div>
+      </div>`;
+    }).join('');
+    const count = r.communities.length;
+    const label = count === 1 ? '1 community' : `${count} communities`;
+    return `<div class="town-group" data-region="${esc(town)}">
+      <button class="region-header" data-region="${esc(town)}">
+        <span class="region-header-title">
+          <span class="region-header-name">${esc(town)}, MD</span>
+          <span class="region-header-count">${label}</span>
+        </span>
+        ${regionChevronSvg}
+      </button>
+      <div class="region-body">
+        ${cardsHtml}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Region header click: toggle this region as active
+  container.querySelectorAll('.region-header').forEach(h => {
+    h.addEventListener('click', () => {
+      setActiveRegion(h.dataset.region);
+    });
+  });
+
+  // Community card clicks
+  container.querySelectorAll('.community-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.view-map-btn')) {
+        e.stopPropagation();
+        const c = communities.find(x => x.id === card.dataset.zoom);
+        if (!c) return;
+        // Make sure the region is active so the marker is on the map
+        if (activeRegion !== c.town) {
+          activeRegion = c.town;
+          updateRegionView();
+          updateSidebarRegionState();
+        }
+        const marker = communityMarkers.find(m => m.communityData.id === c.id);
+        setTimeout(() => {
+          map.flyTo(c.coords, 13, { duration: 0.85 });
+          if (marker) setTimeout(() => marker.openPopup(), 850);
+        }, 50);
+        if (window.innerWidth <= 760 || document.getElementById('app').classList.contains('compact')) {
+          sidebarEl.classList.remove('open');
+          backdropEl.classList.remove('show');
+        }
+        return;
+      }
+      card.classList.toggle('expanded');
+    });
+  });
+}
+renderCommunityList();
+
+// ===== TUTORIAL =====
+const tutorialEl = document.getElementById('tutorial');
+const tutorialKey = 'wilkerson_map_tutorial_seen';
+function showTutorial() { tutorialEl.classList.add('show'); }
+function hideTutorial() { tutorialEl.classList.remove('show'); }
+if (!localStorage.getItem(tutorialKey) && params.get('tutorial') !== '0') {
+  setTimeout(showTutorial, 400);
+}
+document.getElementById('helpBtn').addEventListener('click', showTutorial);
+document.getElementById('tutorialClose').addEventListener('click', () => {
+  if (document.getElementById('tutorialDontShow').checked) {
+    localStorage.setItem(tutorialKey, '1');
+  }
+  hideTutorial();
+});
+tutorialEl.addEventListener('click', (e) => {
+  if (e.target === tutorialEl) hideTutorial();
+});
+const sidebarEl = document.getElementById('sidebar');
+const backdropEl = document.getElementById('sidebarBackdrop');
+function setSidebar(open) {
+  sidebarEl.classList.toggle('open', open);
+  backdropEl.classList.toggle('show', open);
+}
+document.getElementById('sidebarToggle').addEventListener('click', () => setSidebar(!sidebarEl.classList.contains('open')));
+document.getElementById('sidebarClose').addEventListener('click', () => setSidebar(false));
+document.getElementById('backToRegions').addEventListener('click', () => {
+  activeRegion = null;
+  updateRegionView();
+  updateSidebarRegionState();
+  // Fit to all regions
+  const allCoords = Object.values(regions).flatMap(r => r.communities.map(c => c.coords));
+  map.flyToBounds(L.latLngBounds(allCoords).pad(0.4), { duration: 0.85, maxZoom: 10 });
+});
+backdropEl.addEventListener('click', () => setSidebar(false));
+map.on('click', () => setSidebar(false));
+
+// Fit to all points
+const all = [...communities.map(x=>x.coords), ...military.map(x=>x.coords), ...hubs.map(x=>x.coords)];
+map.fitBounds(L.latLngBounds(all), { padding:[50,50] });
+
+// Make sure map sizes to iframe after load
+window.addEventListener('resize', () => map.invalidateSize());
+setTimeout(() => map.invalidateSize(), 100);
+</script>
+</body>
+</html>

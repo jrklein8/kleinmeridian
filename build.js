@@ -77,9 +77,43 @@ if (fs.existsSync(cname)) {
   fs.copyFileSync(cname, path.join(OUT_DIR, 'CNAME'));
 }
 
+// Copy vibemap/ subfolder to docs/vibemap/
+const vibeSrc = path.join(ROOT, 'vibemap');
+if (fs.existsSync(vibeSrc)) {
+  copyDirSync(vibeSrc, path.join(OUT_DIR, 'vibemap'));
+  console.log('✓ Copied vibemap/ → docs/vibemap/');
+}
+
+// Copy lastlight/ subfolder to docs/lastlight/
+const lastlightSrc = path.join(ROOT, 'lastlight');
+if (fs.existsSync(lastlightSrc)) {
+  copyDirSync(lastlightSrc, path.join(OUT_DIR, 'lastlight'));
+  console.log('✓ Copied lastlight/ → docs/lastlight/');
+}
+
+// Copy wilkerson-map/ subfolder (hidden client deliverable — no link from homepage)
+const wilkersonSrc = path.join(ROOT, 'wilkerson-map');
+if (fs.existsSync(wilkersonSrc)) {
+  copyDirSync(wilkersonSrc, path.join(OUT_DIR, 'wilkerson-map'));
+  console.log('✓ Copied wilkerson-map/ → docs/wilkerson-map/');
+}
+
 console.log('✓ Build complete → /docs');
 console.log(`  ${Object.keys(content).length} content override(s) applied`);
 
 function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function copyDirSync(src, dest) {
+  fs.mkdirSync(dest, { recursive: true });
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    if (entry.isDirectory()) {
+      copyDirSync(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
 }
