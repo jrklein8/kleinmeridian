@@ -25,7 +25,9 @@ from fastapi.staticfiles import StaticFiles
 from shapely.geometry import shape, Point, mapping
 from shapely.strtree import STRtree
 
-import mesh as mesh_mod
+# NOTE: `mesh` (MRMS radar hail) is imported lazily inside compute_storms only when
+# radar is requested, so the heavy GRIB/numpy/xarray stack isn't needed otherwise
+# (e.g. the static-site pipeline bakes data with radar off and skips those deps).
 
 # --------------------------------------------------------------------------- #
 # Configuration
@@ -86,6 +88,15 @@ ZCTA_GRADE_BANDS = [
     (10.0, "Medium",   "#fd8d3c"),
     (4.0,  "Low-Med",  "#feb24c"),
     (1.5,  "Low",      "#fed976"),
+]
+
+# Radar (MRMS) hail-size legend — kept here so the response doesn't need to import
+# the mesh module (which pulls numpy/xarray) when radar is off.
+RADAR_LEGEND = [
+    {"label": "2\"+ hail", "color": "#7a0177"},
+    {"label": "1.5-2\" hail", "color": "#bd0026"},
+    {"label": "1-1.5\" hail", "color": "#f03b20"},
+    {"label": "0.75-1\" hail", "color": "#fd8d3c"},
 ]
 
 # Time windows the UI exposes (label key -> days back from now)
@@ -750,6 +761,7 @@ def compute_storms(window="6m", radius=75.0, types="hail,wind,tornado", unit="zi
         storm_days = {r["valid"][:10].replace("-", "") for r in filtered if r.get("valid")}
         storm_days |= {w["issue"][:10].replace("-", "") for w in warn_filtered if w.get("issue")}
         try:
+            import mesh as mesh_mod   # lazy: only loads numpy/xarray/cfgrib when radar is on
             mesh = mesh_mod.get_mesh(storm_days, radius)
         except Exception as exc:
             mesh_error = str(exc)
@@ -815,7 +827,7 @@ def compute_storms(window="6m", radius=75.0, types="hail,wind,tornado", unit="zi
         "top_areas": areas,
         "top_neighborhoods": top_neighborhoods,
         "grade_bands": [{"label": l, "color": c, "min": t} for t, l, c in GRADE_BANDS],
-        "radar_legend": mesh_mod.HAIL_LEGEND,
+        "radar_legend": RADAR_LEGEND,
     }
 
 

@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r pipelines/storm_leads/requirements.txt
 
-      - name: Build storm-lead data (NWS reports + warnings + MRMS radar)
+      - name: Build storm-lead data (NWS reports + warning swaths)
         run: python pipelines/build_storm_leads.py
 
       - name: Build site
@@ -31,6 +31,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add leads/data/ docs/leads/ pipelines/storm_leads/mesh_cache/
+          git add leads/data/ docs/leads/
           git diff --staged --quiet || git commit -m "chore: update storm lead data [skip ci]"
           git push

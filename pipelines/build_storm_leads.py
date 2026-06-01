@@ -25,7 +25,9 @@ WINDOWS = ["yesterday", "1w", "1m", "6m"]
 UNITS = ["zip", "bg"]
 RADIUS = S.MAX_RADIUS_MI                       # bake the full area; client filters by radius
 TYPES = "hail,wind,tornado"
-RADAR = int(os.environ.get("LEADS_RADAR", "1"))   # set LEADS_RADAR=0 to skip the radar layer
+# Radar (MRMS) is OFF for the hosted page to keep the scheduled Action light + reliable
+# (no GRIB/numpy/xarray deps, no NOAA fetch). Set LEADS_RADAR=1 to re-enable.
+RADAR = int(os.environ.get("LEADS_RADAR", "0"))
 
 
 def compact(path, obj):
