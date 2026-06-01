@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lead Dashboard</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <header class="brand">
+        <!-- Drop the JEM logo here later, e.g. <img src="logo.png" alt="JEM Roofing" /> -->
+        <div class="brand-mark" id="brand-logo">JEM</div>
+        <div>
+          <h1>Lead Dashboard</h1>
+          <p class="sub">Roof-damage marketing targets &middot; Wilmington, NC</p>
+        </div>
+      </header>
+
+      <div id="panels">
+        <section class="panel" data-panel="time">
+          <div class="panel-head">
+            <span class="drag-handle" title="Drag to reorder">⠿</span>
+            <span class="panel-title">Time window</span>
+            <span class="chevron"></span>
+          </div>
+          <div class="panel-body">
+            <div class="seg" id="window-seg">
+              <button data-window="yesterday">Yesterday</button>
+              <button data-window="1w">1 Week</button>
+              <button data-window="1m">1 Month</button>
+              <button data-window="6m" class="active">6 Months</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="radius">
+          <div class="panel-head">
+            <span class="drag-handle" title="Drag to reorder">⠿</span>
+            <span class="panel-title">Drive radius</span>
+            <span class="chevron"></span>
+          </div>
+          <div class="panel-body">
+            <div class="radius-row">
+              <input type="range" id="radius" min="25" max="100" step="5" value="75" />
+              <output id="radius-out">75 mi</output>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="types">
+          <div class="panel-head">
+            <span class="drag-handle" title="Drag to reorder">⠿</span>
+            <span class="panel-title">Event types</span>
+            <span class="chevron"></span>
+          </div>
+          <div class="panel-body">
+            <div class="checks">
+              <label class="chk"><input type="checkbox" data-type="hail" checked /> <span class="dot hail"></span> Hail</label>
+              <label class="chk"><input type="checkbox" data-type="wind" checked /> <span class="dot wind"></span> Wind</label>
+              <label class="chk"><input type="checkbox" data-type="tornado" checked /> <span class="dot tornado"></span> Tornado</label>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="detail">
+          <div class="panel-head">
+            <span class="drag-handle" title="Drag to reorder">⠿</span>
+            <span class="panel-title">Neighborhood detail</span>
+            <span class="chevron"></span>
+          </div>
+          <div class="panel-body">
+            <div class="seg seg-sm" id="unit-seg">
+              <button data-unit="zip">ZIP codes</button>
+              <button data-unit="bg" class="active">Block groups</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="layers">
+          <div class="panel-head">
+            <span class="drag-handle" title="Drag to reorder">⠿</span>
+            <span class="panel-title">Map layers</span>
+            <span class="chevron"></span>
+          </div>
+          <div class="panel-body">
+            <div class="layers">
+              <label class="chk"><input type="checkbox" data-layer="zips" checked /> Neighborhood grades</label>
+              <label class="chk"><input type="checkbox" data-layer="swaths" /> Storm swaths (warning bands)</label>
+              <label class="chk"><input type="checkbox" data-layer="radar" /> Radar hail (MRMS) <span class="hint" data-tip="Downloads NWS MRMS radar hail grids for each storm day in the window, so it loads slower — fastest on short windows, and cached after the first pull.">slower</span></label>
+              <label class="chk"><input type="checkbox" data-layer="heat" /> Damage heat (fine grid)</label>
+              <label class="chk"><input type="checkbox" data-layer="pins" checked /> Individual report pins</label>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="targets">
+          <div class="panel-head">
+            <span class="drag-handle" title="Drag to reorder">⠿</span>
+            <span class="panel-title">Top targets <span class="hint" data-tip="Damage score = storm reports inside the area + severe-warning swaths over it + radar hail, weighted by hail size and wind speed, with a boost for more recent events. Higher score = more roof-damage activity = a warmer lead.">ranked by score</span></span>
+            <span class="chevron"></span>
+          </div>
+          <div class="panel-body">
+            <div class="seg seg-sm" id="top-mode">
+              <button data-mode="areas" class="active">Neighborhoods</button>
+              <button data-mode="towns">Towns</button>
+            </div>
+            <ol class="areas" id="areas"></ol>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="export">
+          <div class="panel-head">
+            <span class="drag-handle" title="Drag to reorder">⠿</span>
+            <span class="panel-title">Export targets <span class="hint" data-tip="CSV / GeoJSON downloads every graded area (grade, score, hail, wind) for direct mail or GIS. Or click an area on the map to export its street addresses for door-knocking.">door-knock / mail</span></span>
+            <span class="chevron"></span>
+          </div>
+          <div class="panel-body">
+            <div class="exports">
+              <button id="export-csv" class="export-btn">CSV</button>
+              <button id="export-geojson" class="export-btn">GeoJSON</button>
+            </div>
+            <p class="export-note">Click a graded area on the map to export its street addresses.</p>
+          </div>
+        </section>
+      </div>
+
+      <footer class="foot">
+        <span id="updated">—</span>
+        <span class="src">Data: NWS reports/warnings (IEM), MRMS MESH radar, Census TIGER</span>
+      </footer>
+    </aside>
+
+    <main id="map"></main>
+    <div id="loading" class="loading hidden"><div class="spinner"></div></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

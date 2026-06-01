@@ -98,6 +98,20 @@ if (fs.existsSync(wilkersonSrc)) {
   console.log('✓ Copied wilkerson-map/ → docs/wilkerson-map/');
 }
 
+// Copy ledger/ subfolder (private event profit tracker — no link from homepage)
+const ledgerSrc = path.join(ROOT, 'ledger');
+if (fs.existsSync(ledgerSrc)) {
+  copyDirSync(ledgerSrc, path.join(OUT_DIR, 'ledger'));
+  console.log('✓ Copied ledger/ → docs/ledger/');
+}
+
+// Copy leads/ subfolder (hidden roofing storm-lead dashboard — no link from homepage)
+const leadsSrc = path.join(ROOT, 'leads');
+if (fs.existsSync(leadsSrc)) {
+  copyDirSync(leadsSrc, path.join(OUT_DIR, 'leads'));
+  console.log('✓ Copied leads/ → docs/leads/');
+}
+
 console.log('✓ Build complete → /docs');
 console.log(`  ${Object.keys(content).length} content override(s) applied`);
 
