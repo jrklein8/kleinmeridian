@@ -610,7 +610,31 @@ function initTooltips() {
   });
 }
 
+// --------------------------------------------------------------------------- //
+// First-visit tutorial (dismissible, with "don't show again")
+// --------------------------------------------------------------------------- //
+function initTutorial() {
+  const TUT_KEY = "jem.tutorial.v1";
+  const overlay = document.getElementById("tutorial");
+  const dontShow = document.getElementById("tut-dontshow");
+  const open = () => overlay.classList.remove("hidden");
+  const close = () => {
+    overlay.classList.add("hidden");
+    if (dontShow.checked) { try { localStorage.setItem(TUT_KEY, "done"); } catch (e) { /* ignore */ } }
+  };
+  document.getElementById("tut-go").addEventListener("click", close);
+  document.getElementById("tut-close").addEventListener("click", close);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !overlay.classList.contains("hidden")) close(); });
+  document.getElementById("help-btn").addEventListener("click", () => { dontShow.checked = false; open(); });
+
+  let dismissed = false;
+  try { dismissed = localStorage.getItem(TUT_KEY) === "done"; } catch (e) { /* ignore */ }
+  if (!dismissed) open();
+}
+
 initPanels();
 initTooltips();
+initTutorial();
 drawRadius();
 load();

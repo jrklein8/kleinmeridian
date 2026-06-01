@@ -134,6 +134,44 @@
 
     <main id="map"></main>
     <div id="loading" class="loading hidden"><div class="spinner"></div></div>
+    <button id="help-btn" title="How to use this map">?</button>
+  </div>
+
+  <div id="tutorial" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" id="tut-close" aria-label="Close">&times;</button>
+      <h2>Find your next roofing leads</h2>
+      <p class="modal-lead">This map shows where recent <b>hail</b> and <b>high winds</b> likely
+        damaged roofs around Wilmington — so you can focus your marketing where the leads are.</p>
+
+      <div class="tut-section">
+        <h3>What the colors mean</h3>
+        <p>Every neighborhood is shaded by how hard it was hit:</p>
+        <div class="tut-scale">
+          <span style="background:#bd0026">High</span>
+          <span style="background:#f03b20">Med-High</span>
+          <span style="background:#fd8d3c">Medium</span>
+          <span style="background:#feb24c">Low-Med</span>
+          <span style="background:#fed976;color:#3a2e00">Low</span>
+        </div>
+        <p class="tut-tip">Red areas are your best leads — recently storm-hit, with likely roof damage and insurance claims.</p>
+      </div>
+
+      <div class="tut-section">
+        <h3>How to use it</h3>
+        <ul class="tut-list">
+          <li><b>Pick a time window</b> at the top — Yesterday, 1 Week, 1 Month, or 6 Months.</li>
+          <li><b>Click any colored area</b> for its details, or scan the ranked <b>Top targets</b> list.</li>
+          <li><b>Export</b> a CSV or GeoJSON for direct mail — or click an area and "Export street addresses" to get a door-knocking list.</li>
+          <li>Drag the map and scroll to zoom, just like Google Maps.</li>
+        </ul>
+      </div>
+
+      <div class="tut-footer">
+        <label class="tut-dontshow"><input type="checkbox" id="tut-dontshow" /> Don't show this again</label>
+        <button class="tut-go" id="tut-go">Got it &mdash; show me the map</button>
+      </div>
+    </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
