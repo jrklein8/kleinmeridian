@@ -139,6 +139,23 @@
   .region-pill-count { background: var(--gold); color: var(--teal-darker); padding: 1px 7px; border-radius: 10px; font-size: 10.5px; font-weight: 700; }
   .region-pill-tip { width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 8px solid var(--accent, white); margin-top: -1px; filter: drop-shadow(0 2px 2px rgba(55, 73, 77, 0.3)); }
 
+  /* Basemap picker — bottom-left corner */
+  .basemap-picker { position: absolute; bottom: 28px; left: 12px; z-index: 500; background: white; border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-lg); overflow: hidden; font-family: 'Poppins', sans-serif; font-size: 12px; min-width: 180px; }
+  .basemap-picker-toggle { display: flex; align-items: center; gap: 8px; padding: 9px 12px; cursor: pointer; font-weight: 600; color: var(--teal-darker); user-select: none; }
+  .basemap-picker-toggle::before { content: ''; width: 14px; height: 14px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2337494d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2'/%3E%3Cline x1='12' y1='22' x2='12' y2='15.5'/%3E%3Cpolyline points='22 8.5 12 15.5 2 8.5'/%3E%3C/svg%3E") no-repeat center / contain; flex-shrink: 0; }
+  .basemap-picker-toggle::after { content: '▾'; margin-left: auto; font-size: 10px; transition: transform 0.15s; color: var(--text-soft); }
+  .basemap-picker.open .basemap-picker-toggle::after { transform: rotate(180deg); }
+  .basemap-picker-toggle:hover { background: var(--cream); }
+  .basemap-picker-options { border-top: 1px solid var(--border-soft); max-height: 0; overflow: hidden; transition: max-height 0.2s ease; }
+  .basemap-picker.open .basemap-picker-options { max-height: 420px; }
+  .basemap-picker-option { padding: 9px 12px; cursor: pointer; color: var(--text-soft); border-bottom: 1px solid var(--border-soft); transition: all 0.1s; }
+  .basemap-picker-option:last-child { border-bottom: none; }
+  .basemap-picker-option:hover { background: var(--cream); }
+  .basemap-picker-option.active { background: var(--gold-soft); color: var(--teal-darker); font-weight: 700; }
+  .basemap-picker-option .opt-label { font-weight: 600; color: var(--teal-darker); }
+  .basemap-picker-option .opt-note { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+  .basemap-picker-option.active .opt-note { color: var(--gold-muted); }
+
   /* Help button — top-right corner */
   .help-btn { position: absolute; top: 12px; right: 12px; z-index: 600; width: 34px; height: 34px; background: white; border: 1px solid var(--border); border-radius: 50%; cursor: pointer; box-shadow: var(--shadow-lg); display: flex; align-items: center; justify-content: center; color: var(--teal-darker); font-family: 'Playfair Display', serif; font-weight: 700; font-size: 16px; transition: all 0.15s; }
   .help-btn:hover { background: var(--teal); color: white; border-color: var(--teal-dark); transform: scale(1.05); }
@@ -331,6 +348,12 @@
     <button class="help-btn" id="helpBtn" aria-label="How to use this map" title="How to use this map">?</button>
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <div id="map"></div>
+    <div class="basemap-picker" id="basemapPicker">
+      <div class="basemap-picker-toggle" id="basemapToggle">
+        <span>Basemap: <span id="basemapCurrent" style="color:var(--gold-muted);">Esri Topo</span></span>
+      </div>
+      <div class="basemap-picker-options" id="basemapOptions"></div>
+    </div>
     <div class="mobile-legend" id="mobileLegend">
       <span class="mobile-legend-item"><span class="mini-icon mini-logo"></span>Wilkerson</span>
       <span class="mobile-legend-item"><span class="mini-icon" style="background:var(--c-military)">★</span>Military</span>
@@ -467,10 +490,77 @@ if (params.get('compact') === '1') document.getElementById('app').classList.add(
 
 // ===== MAP =====
 const map = L.map('map', { center:[38.65,-76.85], zoom:9, zoomControl:true });
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  maxZoom:19
-}).addTo(map);
+// Basemap options — user can switch live via the picker (bottom-left)
+const BASEMAPS = {
+  topo:    { label:'Esri Topo',        note:'Warm terrain, real-estate feel',
+             url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+             attribution:'Tiles © Esri — Esri, DeLorme, NAVTEQ, TomTom, USGS', maxZoom:19 },
+  natgeo:  { label:'National Geographic', note:'Magazine warmth',
+             url:'https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}',
+             attribution:'Tiles © Esri — National Geographic, Esri, DeLorme, NAVTEQ, USGS', maxZoom:16 },
+  street:  { label:'Esri Street',      note:'Clean & professional',
+             url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+             attribution:'Tiles © Esri — Esri, HERE, Garmin, USGS', maxZoom:19 },
+  cyclosm: { label:'CyclOSM',          note:'Soft beige & sage',
+             url:'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+             attribution:'© OpenStreetMap contributors — CyclOSM', maxZoom:19 },
+  hot:     { label:'Humanitarian OSM', note:'Warm streets, muted greens',
+             url:'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+             attribution:'© OpenStreetMap contributors, HOT', maxZoom:19 },
+  imagery: { label:'Satellite Imagery', note:'Aerial photos (wow factor)',
+             url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+             attribution:'Tiles © Esri — Esri, Maxar, Earthstar Geographics', maxZoom:19 },
+  osm:     { label:'OpenStreetMap',    note:'Standard, saturated',
+             url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+             attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom:19 }
+};
+
+let currentTileLayer = null;
+function loadBasemap(key) {
+  const b = BASEMAPS[key] || BASEMAPS.topo;
+  if (currentTileLayer) map.removeLayer(currentTileLayer);
+  currentTileLayer = L.tileLayer(b.url, { attribution: b.attribution, maxZoom: b.maxZoom });
+  currentTileLayer.addTo(map);
+  currentTileLayer.bringToBack();
+  try { localStorage.setItem('wilkerson_basemap', key); } catch(e) {}
+  document.querySelectorAll('.basemap-picker-option').forEach(el => {
+    el.classList.toggle('active', el.dataset.basemap === key);
+  });
+  const current = document.getElementById('basemapCurrent');
+  if (current) current.textContent = b.label;
+}
+
+// Populate the basemap picker options
+(function initBasemapPicker() {
+  const optionsEl = document.getElementById('basemapOptions');
+  if (!optionsEl) return;
+  optionsEl.innerHTML = Object.entries(BASEMAPS).map(([key, b]) => `
+    <div class="basemap-picker-option" data-basemap="${key}">
+      <div class="opt-label">${b.label}</div>
+    </div>
+  `).join('');
+  optionsEl.querySelectorAll('.basemap-picker-option').forEach(el => {
+    el.addEventListener('click', () => {
+      loadBasemap(el.dataset.basemap);
+      document.getElementById('basemapPicker').classList.remove('open');
+    });
+  });
+  document.getElementById('basemapToggle').addEventListener('click', () => {
+    document.getElementById('basemapPicker').classList.toggle('open');
+  });
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#basemapPicker')) {
+      document.getElementById('basemapPicker').classList.remove('open');
+    }
+  });
+})();
+
+// Initial pick: URL param > localStorage > default
+const initialBasemap = params.get('basemap')
+  || (function(){ try { return localStorage.getItem('wilkerson_basemap'); } catch(e){ return null; } })()
+  || 'topo';
+loadBasemap(BASEMAPS[initialBasemap] ? initialBasemap : 'topo');
 
 // ===== ICONS (brand-colored) =====
 function makeIcon(color, opts = {}) {
