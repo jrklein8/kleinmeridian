@@ -467,8 +467,9 @@ if (params.get('compact') === '1') document.getElementById('app').classList.add(
 
 // ===== MAP =====
 const map = L.map('map', { center:[38.65,-76.85], zoom:9, zoomControl:true });
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-  attribution:'© OpenStreetMap © CARTO', subdomains:'abcd', maxZoom:19
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom:19
 }).addTo(map);
 
 // ===== ICONS (brand-colored) =====
