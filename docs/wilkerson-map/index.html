@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="robots" content="noindex, nofollow" />
 <title>Wilkerson Homes — Community Proximity Map</title>
 <link rel="icon" type="image/png" href="assets/Proximity%20Map%20-%20Simple.png" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -118,6 +117,280 @@
   .ring-btn { flex: 1; padding: 7px 8px; background: white; border: 1px solid var(--border); color: var(--text-soft); border-radius: 5px; cursor: pointer; font-size: 11.5px; font-weight: 600; font-family: 'Poppins', sans-serif; transition: all 0.15s; }
   .ring-btn:hover { background: var(--cream); border-color: var(--teal); }
   .ring-btn.active { background: var(--teal); color: white; border-color: var(--teal-dark); }
+
+  .print-flyer-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 14px; background: linear-gradient(135deg, var(--gold) 0%, var(--gold-muted) 100%); color: var(--teal-darker); border: none; border-radius: 6px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.3px; box-shadow: var(--shadow); transition: all 0.15s; }
+  .print-flyer-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); background: linear-gradient(135deg, var(--gold-muted) 0%, var(--gold) 100%); }
+
+  /* ===== FLYER-MODE LAYOUT — applied during on-screen preview AND printing ===== */
+  @media print {
+    @page { size: letter portrait; margin: 0.4in; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+  body.flyer-mode .layer-toggle input,
+  body.flyer-mode .ring-controls,
+  body.flyer-mode .basemap-picker,
+  body.flyer-mode .help-btn,
+  body.flyer-mode .sidebar-toggle,
+  body.flyer-mode .sidebar-close,
+  body.flyer-mode .back-to-regions,
+  body.flyer-mode .mobile-legend,
+  body.flyer-mode .tutorial,
+  body.flyer-mode .region-header-chevron,
+  body.flyer-mode .community-card .chevron,
+  body.flyer-mode .view-map-btn,
+  body.flyer-mode .leaflet-control-zoom,
+  body.flyer-mode .leaflet-control-attribution,
+  body.flyer-mode .print-flyer-btn,
+  body.flyer-mode .print-flyer-btn + div,
+  body.flyer-mode .map-title,
+  body.flyer-mode .section-rings,
+  body.flyer-mode .section-print { display: none !important; }
+
+  body.flyer-mode .community-card .details { max-height: none !important; padding-top: 6px !important; margin-top: 5px !important; border-top: 1px dashed #ccc !important; }
+  body.flyer-mode .community-card { break-inside: avoid; page-break-inside: avoid; margin-bottom: 4px !important; }
+  body.flyer-mode .region-body { max-height: none !important; padding-top: 4px !important; overflow: visible !important; }
+  body.flyer-mode .town-group { break-inside: avoid; page-break-inside: avoid; }
+
+  body.flyer-mode { background: white !important; overflow: auto !important; }
+  body.flyer-mode html, body.flyer-mode body { height: auto !important; }
+  body.flyer-mode .app { display: block !important; height: auto !important; width: 100% !important; grid-template-columns: none !important; background: white !important; }
+  body.flyer-mode .sidebar,
+  body.flyer-mode .map-container { display: none !important; }
+  body.flyer-mode .flyer-canvas { display: flex !important; flex-direction: column !important; gap: 0 !important; background: white !important; }
+  body.flyer-mode .flyer-canvas > [data-block-id] { display: block !important; width: 100% !important; }
+  body.flyer-mode .flyer-canvas .header { border-bottom: 2px solid var(--gold) !important; }
+  body.flyer-mode .flyer-canvas .footer { border-top: 1px solid var(--border) !important; }
+  body.flyer-mode .sidebar-backdrop { display: none !important; }
+
+  body.flyer-mode .header { padding: 10px 14px 8px !important; }
+  body.flyer-mode .header h1 { font-size: 18px !important; }
+  body.flyer-mode .header .sub { font-size: 10.5px !important; }
+  body.flyer-mode .tagline { margin-top: 6px !important; padding-top: 6px !important; font-size: 11px !important; }
+  body.flyer-mode .brand { font-size: 9px !important; letter-spacing: 2px !important; margin-bottom: 4px !important; }
+  body.flyer-mode .section { padding: 8px 14px !important; }
+  body.flyer-mode .section h2 { font-size: 9px !important; margin-bottom: 6px !important; }
+
+  body.flyer-mode #communitiesList { column-count: 2; column-gap: 12px; }
+  body.flyer-mode .town-group { margin-bottom: 6px !important; }
+  body.flyer-mode .region-header { padding: 5px 8px !important; font-size: 11px !important; box-shadow: none !important; }
+  body.flyer-mode .region-header-name { font-size: 12px !important; }
+  body.flyer-mode .region-header-count { font-size: 9px !important; padding: 1px 6px !important; }
+  body.flyer-mode .community-card { padding: 6px 10px !important; margin-bottom: 3px !important; box-shadow: none !important; border-radius: 4px !important; }
+  body.flyer-mode .community-card .name { font-size: 11px !important; }
+  body.flyer-mode .community-card .meta { font-size: 10px !important; }
+  body.flyer-mode .community-card .addr { font-size: 9.5px !important; }
+
+  body.flyer-mode .hero-stat { padding: 8px 12px !important; font-size: 10px !important; }
+  body.flyer-mode .hero-stat strong { font-size: 13px !important; }
+
+  body.flyer-mode .layer-toggle { padding: 3px 8px !important; margin-bottom: 2px !important; font-size: 10px !important; box-shadow: none !important; border: 1px solid #ddd !important; }
+  body.flyer-mode .layer-toggle.off { display: none !important; }
+  body.flyer-mode .swatch, body.flyer-mode .swatch-logo { width: 12px !important; height: 12px !important; }
+  body.flyer-mode .layer-toggle .count { display: none !important; }
+
+  body.flyer-mode .map-container { display: block !important; page-break-before: auto; height: auto !important; }
+  body.flyer-mode #map { width: 100% !important; height: 5.5in !important; border: 1px solid #ccc; }
+
+  body.flyer-mode .footer { font-size: 8.5px !important; padding: 6px 14px !important; text-align: center; }
+
+  body.flyer-preview { padding: 20px 20px 90px !important; background: #d9d0be !important; }
+  body.flyer-preview .app { max-width: 8.5in; margin: 0 auto; box-shadow: 0 8px 30px rgba(55, 73, 77, 0.25); border: 1px solid #b4a888; }
+
+  /* --- Drag to reorder (flyer preview only) --- */
+  body.flyer-preview .flyer-draggable { position: relative; }
+  body.flyer-preview .flyer-draggable.dragging { opacity: 0.45; transform: scale(0.98); }
+  body.flyer-preview .flyer-drop-target-above { box-shadow: inset 0 3px 0 var(--gold); }
+  body.flyer-preview .flyer-drop-target-below { box-shadow: inset 0 -3px 0 var(--gold); }
+
+  /* Dedicated drag handle at the top-right of each block */
+  .flyer-drag-handle { display: none; }
+  body.flyer-preview .flyer-drag-handle { display: flex; position: absolute; top: 6px; right: 6px; width: 24px; height: 20px; background: rgba(255, 255, 255, 0.85); border-radius: 4px; align-items: center; justify-content: center; cursor: grab; z-index: 100; opacity: 0.5; transition: opacity 0.15s, background 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+  body.flyer-preview .flyer-drag-handle:hover { opacity: 1; background: white; }
+  body.flyer-preview .flyer-drag-handle:active { cursor: grabbing; }
+  .flyer-drag-handle svg { width: 14px; height: 14px; color: var(--teal-darker); pointer-events: none; }
+  @media print { .flyer-drag-handle { display: none !important; } }
+
+  /* Prevent Leaflet map from ever being a drag source or showing selection */
+  body.flyer-preview .leaflet-container { user-select: none !important; -webkit-user-drag: none !important; -webkit-user-select: none !important; }
+  body.flyer-preview .leaflet-container * { -webkit-user-drag: none !important; }
+
+  /* --- Editable text fields (contenteditable) --- */
+  body.flyer-mode [contenteditable="true"] { outline: none; }
+  body.flyer-preview [contenteditable="true"] { outline: 1px dashed transparent; padding: 1px 3px; margin: -1px -3px; border-radius: 3px; transition: outline-color 0.15s, background 0.15s; cursor: text; }
+  body.flyer-preview [contenteditable="true"]:hover { outline-color: var(--gold-muted); background: rgba(218, 184, 68, 0.1); }
+  body.flyer-preview [contenteditable="true"]:focus { outline-color: var(--teal); outline-style: solid; background: rgba(118, 179, 184, 0.08); }
+  body.flyer-preview [contenteditable="true"]:empty::before { content: attr(data-placeholder); color: var(--muted); font-style: italic; }
+  @media print { [contenteditable="true"] { outline: none !important; background: transparent !important; } }
+
+  /* --- Flyer CTA block (contact / call-to-action bar at the bottom of the flyer) --- */
+  .flyer-cta { display: none; }
+  body.flyer-mode .flyer-cta { display: block !important; padding: 10px 14px; background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); color: white; border-top: 3px solid var(--gold); text-align: center; }
+  body.flyer-mode .flyer-cta-headline { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 800; margin-bottom: 3px; }
+  body.flyer-mode .flyer-cta-contact { font-size: 11px; color: var(--gold-soft); font-weight: 500; letter-spacing: 0.3px; }
+
+  /* Layout presets are quick block-order shortcuts (JS-driven via layout buttons). */
+
+  /* --- Community list column count (cards layout only; grid/compact/table override) --- */
+  body.flyer-mode[data-flyer-list="cards"][data-flyer-columns="1"] #communitiesList { column-count: 1 !important; }
+  body.flyer-mode[data-flyer-list="cards"][data-flyer-columns="2"] #communitiesList { column-count: 2 !important; }
+  body.flyer-mode[data-flyer-list="cards"][data-flyer-columns="3"] #communitiesList { column-count: 3 !important; column-gap: 8px !important; }
+  body.flyer-mode[data-flyer-list="cards"][data-flyer-columns="3"] .community-card .name { font-size: 10.5px !important; }
+  body.flyer-mode[data-flyer-list="cards"][data-flyer-columns="3"] .community-card .meta,
+  body.flyer-mode[data-flyer-list="cards"][data-flyer-columns="3"] .community-card .addr { font-size: 9px !important; }
+  /* Grid layout: override its baked-in 3-col with the chosen column count */
+  body.flyer-mode[data-flyer-list="grid"][data-flyer-columns="2"] .town-group .region-body { grid-template-columns: repeat(2, 1fr) !important; }
+  body.flyer-mode[data-flyer-list="grid"][data-flyer-columns="4"] .town-group .region-body { grid-template-columns: repeat(4, 1fr) !important; }
+
+  /* --- Community-card text alignment --- */
+  body.flyer-mode[data-flyer-align="left"] .community-card { text-align: left !important; }
+  body.flyer-mode[data-flyer-align="center"] .community-card { text-align: center !important; }
+  body.flyer-mode[data-flyer-align="right"] .community-card { text-align: right !important; }
+  body.flyer-mode[data-flyer-align="left"] .community-card .name { justify-content: flex-start !important; }
+  body.flyer-mode[data-flyer-align="center"] .community-card .name { justify-content: center !important; }
+  body.flyer-mode[data-flyer-align="right"] .community-card .name { justify-content: flex-end !important; }
+  /* When center-aligned, add breathing room to the meta/addr lines for readability */
+  body.flyer-mode[data-flyer-align="center"] .community-card .meta,
+  body.flyer-mode[data-flyer-align="center"] .community-card .addr { padding: 0 2px; }
+
+  /* Section-level (h2) alignment follows text alignment too */
+  body.flyer-mode[data-flyer-align="center"] .section h2 { text-align: center !important; }
+  body.flyer-mode[data-flyer-align="right"] .section h2 { text-align: right !important; }
+
+  /* ===== Community list layout variants (data-flyer-list=cards|compact|grid|table) ===== */
+  /* -- CARDS (default) — as-is -- */
+
+  /* -- COMPACT — one-line per community, single column, dense -- */
+  body.flyer-mode[data-flyer-list="compact"] #communitiesList { column-count: 1 !important; }
+  body.flyer-mode[data-flyer-list="compact"] .region-header { padding: 4px 8px !important; font-size: 10px !important; margin-bottom: 3px !important; }
+  body.flyer-mode[data-flyer-list="compact"] .region-header-name { font-size: 11px !important; }
+  body.flyer-mode[data-flyer-list="compact"] .community-card { padding: 3px 8px !important; margin-bottom: 2px !important; display: grid !important; grid-template-columns: auto 1fr auto !important; gap: 8px !important; align-items: center !important; }
+  body.flyer-mode[data-flyer-list="compact"] .community-card .name { font-size: 10.5px !important; grid-column: 1; margin: 0 !important; }
+  body.flyer-mode[data-flyer-list="compact"] .community-card .details { display: contents !important; max-height: none !important; padding: 0 !important; margin: 0 !important; border: none !important; }
+  body.flyer-mode[data-flyer-list="compact"] .community-card .meta { grid-column: 2; font-size: 9.5px !important; margin: 0 !important; text-align: right; }
+  body.flyer-mode[data-flyer-list="compact"] .community-card .addr { grid-column: 3; font-size: 9px !important; margin: 0 !important; text-align: right; color: var(--muted) !important; max-width: 2in; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  body.flyer-mode[data-flyer-list="compact"] .community-card .view-map-btn { display: none !important; }
+  body.flyer-mode[data-flyer-list="compact"] .town-group { margin-bottom: 4px !important; }
+
+  /* -- GRID — 3-col grid of small cards -- */
+  body.flyer-mode[data-flyer-list="grid"] #communitiesList { column-count: 1 !important; }
+  body.flyer-mode[data-flyer-list="grid"] .town-group .region-body { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 4px !important; }
+  body.flyer-mode[data-flyer-list="grid"] .community-card { padding: 5px 8px !important; margin-bottom: 0 !important; }
+  body.flyer-mode[data-flyer-list="grid"] .community-card .name { font-size: 10px !important; }
+  body.flyer-mode[data-flyer-list="grid"] .community-card .meta { font-size: 8.5px !important; }
+  body.flyer-mode[data-flyer-list="grid"] .community-card .addr { font-size: 8px !important; }
+  body.flyer-mode[data-flyer-list="grid"] .community-card .view-map-btn { display: none !important; }
+  body.flyer-mode[data-flyer-list="grid"] .region-header { padding: 3px 8px !important; font-size: 9.5px !important; margin-bottom: 3px !important; }
+
+  /* -- TABLE — dense tabular rows -- */
+  body.flyer-mode[data-flyer-list="table"] #communitiesList { column-count: 1 !important; }
+  body.flyer-mode[data-flyer-list="table"] .region-header { padding: 3px 8px !important; font-size: 10px !important; margin: 6px 0 2px !important; border-bottom: 1.5px solid var(--gold) !important; border-radius: 3px !important; }
+  body.flyer-mode[data-flyer-list="table"] .community-card { padding: 3px 8px !important; margin-bottom: 0 !important; border: none !important; border-bottom: 1px dotted var(--border) !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; display: grid !important; grid-template-columns: 1.4in 1.1in 1fr !important; align-items: center !important; gap: 6px !important; }
+  body.flyer-mode[data-flyer-list="table"] .community-card:last-child { border-bottom: none !important; }
+  body.flyer-mode[data-flyer-list="table"] .community-card .name { font-size: 10px !important; grid-column: 1; margin: 0 !important; }
+  body.flyer-mode[data-flyer-list="table"] .community-card .details { display: contents !important; max-height: none !important; padding: 0 !important; margin: 0 !important; border: none !important; }
+  body.flyer-mode[data-flyer-list="table"] .community-card .meta { grid-column: 2; font-size: 9.5px !important; color: var(--gold-muted) !important; margin: 0 !important; }
+  body.flyer-mode[data-flyer-list="table"] .community-card .addr { grid-column: 3; font-size: 9px !important; color: var(--muted) !important; margin: 0 !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  body.flyer-mode[data-flyer-list="table"] .community-card .view-map-btn { display: none !important; }
+  body.flyer-mode[data-flyer-list="table"] .community-card.focus-target { padding: 5px 10px !important; background: linear-gradient(135deg, #fff 0%, var(--gold-soft) 100%) !important; }
+
+  /* --- Section toggles (hide-{name}) --- */
+  body.flyer-mode.flyer-hide-legend .flyer-map-legend { display: none !important; }
+  /* In flyer mode, always hide the standalone Layers section (legend moved onto the map) */
+  body.flyer-mode .section[data-block-id="legend"] { display: none !important; }
+  /* Compact map-overlay legend, only shows in flyer mode */
+  .flyer-map-legend { display: none; }
+  body.flyer-mode .flyer-map-legend { display: flex !important; position: absolute; top: 8px; right: 8px; background: rgba(255, 255, 255, 0.94); border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif; font-size: 9px; font-weight: 600; color: var(--text-soft); flex-wrap: wrap; gap: 6px 10px; max-width: 60%; z-index: 500; align-items: center; }
+  .flyer-map-legend-item { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .flyer-map-legend-item .fmli-icon { width: 12px; height: 12px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 8px; border: 1.2px solid white; box-shadow: 0 0 0 0.5px rgba(0,0,0,0.15); flex-shrink: 0; }
+  .flyer-map-legend-item .fmli-logo { width: 15px; height: 13px; background: url('assets/Proximity%20Map%20-%20Simple.png') no-repeat center / contain; border: none; box-shadow: none; }
+  body.flyer-mode.flyer-hide-communities .section:has(#communitiesList) { display: none !important; }
+  body.flyer-mode.flyer-hide-herostat .hero-stat { display: none !important; }
+  body.flyer-mode.flyer-hide-cta .flyer-cta { display: none !important; }
+  body.flyer-mode.flyer-hide-map .map-container { display: none !important; }
+
+  /* --- Map size variants --- */
+  body.flyer-mode[data-flyer-map-size="s"] #map { height: 3.5in !important; }
+  body.flyer-mode[data-flyer-map-size="m"] #map { height: 5.5in !important; }
+  body.flyer-mode[data-flyer-map-size="l"] #map { height: 7.5in !important; }
+  body.flyer-mode[data-flyer-layout="split"][data-flyer-map-size="s"] #map { height: 5in !important; }
+  body.flyer-mode[data-flyer-layout="split"][data-flyer-map-size="l"] #map { height: 9in !important; }
+
+  /* --- Text size variants (scales font sizes globally in flyer) --- */
+  body.flyer-mode[data-flyer-text-size="s"] .app { font-size: 88% !important; }
+  body.flyer-mode[data-flyer-text-size="s"] .header h1 { font-size: 15px !important; }
+  body.flyer-mode[data-flyer-text-size="s"] .community-card .name { font-size: 10px !important; }
+  body.flyer-mode[data-flyer-text-size="s"] .community-card .meta { font-size: 8.5px !important; }
+  body.flyer-mode[data-flyer-text-size="s"] .community-card .addr { font-size: 8px !important; }
+  body.flyer-mode[data-flyer-text-size="l"] .app { font-size: 112% !important; }
+  body.flyer-mode[data-flyer-text-size="l"] .header h1 { font-size: 22px !important; }
+  body.flyer-mode[data-flyer-text-size="l"] .community-card .name { font-size: 13px !important; }
+  body.flyer-mode[data-flyer-text-size="l"] .community-card .meta { font-size: 11.5px !important; }
+  body.flyer-mode[data-flyer-text-size="l"] .community-card .addr { font-size: 11px !important; }
+
+  /* --- Focus mode: hide unfocused regions/communities --- */
+  /* Both single- and region-focus hide non-matching town-groups */
+  body.flyer-mode[data-flyer-focus-type="single"] .town-group:not(.focus-owner),
+  body.flyer-mode[data-flyer-focus-type="region"] .town-group:not(.focus-owner) { display: none !important; }
+  /* Single focus: hide non-featured community cards + highlight the one chosen */
+  body.flyer-mode[data-flyer-focus-type="single"] .community-card:not(.focus-target) { display: none !important; }
+  body.flyer-mode[data-flyer-focus-type="single"] #communitiesList { column-count: 1 !important; }
+  body.flyer-mode .community-card.focus-target { border-left: 6px solid var(--gold) !important; padding: 14px 16px !important; background: linear-gradient(135deg, #fff 0%, var(--gold-soft) 100%) !important; margin-bottom: 8px !important; box-shadow: 0 3px 10px rgba(218, 184, 68, 0.28) !important; }
+  body.flyer-mode .community-card.focus-target .name { font-size: 17px !important; margin-bottom: 4px !important; }
+  body.flyer-mode .community-card.focus-target .name::before { width: 24px !important; height: 22px !important; }
+  body.flyer-mode .community-card.focus-target .meta { font-size: 13px !important; color: var(--teal-darker) !important; font-weight: 700 !important; }
+  body.flyer-mode .community-card.focus-target .addr { font-size: 11.5px !important; }
+  body.flyer-mode .community-card.focus-target .details { max-height: none !important; padding-top: 8px !important; margin-top: 6px !important; }
+  /* Region focus: highlight the single region header, no card-level featured styling */
+  body.flyer-mode[data-flyer-focus-type="region"] .region-header,
+  body.flyer-mode[data-flyer-focus-type="single"] .region-header { background: linear-gradient(135deg, var(--gold) 0%, var(--gold-muted) 100%) !important; color: var(--teal-darker) !important; }
+  body.flyer-mode[data-flyer-focus-type="single"] .region-header-count { display: none !important; }
+
+  /* --- Preview toolbar --- */
+  .flyer-preview-toolbar { display: none; position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 3000; background: white; border: 1px solid var(--border); border-radius: 14px; padding: 10px 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.28); align-items: center; gap: 14px; font-family: 'Poppins', sans-serif; max-width: 96vw; flex-wrap: wrap; transition: transform 0.25s ease, opacity 0.2s ease; }
+  body.flyer-preview.toolbar-collapsed .flyer-preview-toolbar { transform: translateX(-50%) translateY(140%); opacity: 0; pointer-events: none; }
+  .flyer-restore-tab { display: none; position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 3000; background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); color: white; border: none; border-radius: 22px; padding: 10px 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.25); font-family: 'Poppins', sans-serif; font-size: 12.5px; font-weight: 700; cursor: pointer; align-items: center; gap: 6px; }
+  body.flyer-preview.toolbar-collapsed .flyer-restore-tab { display: inline-flex; }
+  .flyer-restore-tab:hover { transform: translateX(-50%) translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.32); }
+  .flyer-collapse-btn { padding: 6px 10px; border-radius: 6px; background: transparent; border: 1px solid var(--border); color: var(--text-soft); cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+  .flyer-collapse-btn:hover { background: var(--cream); color: var(--teal-darker); }
+  .flyer-select { padding: 5px 24px 5px 10px; border: 1px solid var(--border); border-radius: 6px; background: white; font-family: 'Poppins', sans-serif; font-size: 11.5px; font-weight: 600; color: var(--teal-darker); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2337494d' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-position: right 6px center; background-repeat: no-repeat; }
+  .flyer-select:hover { border-color: var(--teal); }
+  .flyer-select.focused { background: var(--gold-soft); border-color: var(--gold-muted); font-weight: 700; }
+  .flyer-reset-btn { padding: 6px 10px; border-radius: 6px; background: transparent; border: 1px dashed var(--border); font-family: 'Poppins', sans-serif; font-size: 10.5px; font-weight: 600; color: var(--text-soft); cursor: pointer; }
+  .flyer-reset-btn:hover { background: var(--cream); color: var(--teal-darker); border-style: solid; }
+
+  /* Communities-visibility dropdown */
+  .flyer-dropdown { position: relative; }
+  .flyer-dropdown summary { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: white; font-family: 'Poppins', sans-serif; font-size: 11.5px; font-weight: 600; color: var(--teal-darker); cursor: pointer; list-style: none; user-select: none; }
+  .flyer-dropdown summary::-webkit-details-marker, .flyer-dropdown summary::marker { display: none; content: ''; }
+  .flyer-dropdown summary::after { content: ' ▾'; font-size: 9px; color: var(--text-soft); }
+  .flyer-dropdown[open] summary { background: var(--gold-soft); border-color: var(--gold-muted); }
+  .flyer-dropdown-menu { position: absolute; bottom: 100%; left: 0; margin-bottom: 6px; background: white; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.22); padding: 6px 0; min-width: 220px; z-index: 100; }
+  .flyer-dropdown-heading { padding: 4px 14px 6px; font-size: 9px; letter-spacing: 1.5px; color: var(--muted); font-weight: 700; text-transform: uppercase; border-bottom: 1px solid var(--border-soft); margin-bottom: 4px; }
+  .flyer-dropdown-item { display: flex; align-items: center; gap: 8px; padding: 5px 14px; cursor: pointer; font-size: 12px; color: var(--text); user-select: none; }
+  .flyer-dropdown-item:hover { background: var(--cream); }
+  .flyer-dropdown-item input { accent-color: var(--teal); flex-shrink: 0; }
+  .flyer-dropdown-item .fdi-town { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-left: auto; font-weight: 600; }
+  .flyer-dropdown-actions { border-top: 1px solid var(--border-soft); padding: 6px 12px 4px; display: flex; gap: 6px; margin-top: 4px; }
+  .flyer-dropdown-actions button { font-size: 10.5px; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer; color: var(--text-soft); font-family: 'Poppins', sans-serif; font-weight: 600; flex: 1; }
+  .flyer-dropdown-actions button:hover { background: var(--cream); color: var(--teal-darker); }
+
+  /* Hidden community — applies only in flyer mode */
+  body.flyer-mode .community-card[data-comm-hidden="1"] { display: none !important; }
+  body.flyer-preview .flyer-preview-toolbar { display: flex; }
+  .flyer-toolbar-group { display: flex; align-items: center; gap: 6px; }
+  .flyer-toolbar-group + .flyer-toolbar-group { border-left: 1px solid var(--border-soft); padding-left: 14px; }
+  .flyer-toolbar-label { font-size: 10px; color: var(--muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-right: 4px; }
+  .flyer-layout-btn { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: white; font-family: 'Poppins', sans-serif; font-size: 11.5px; font-weight: 600; color: var(--text-soft); cursor: pointer; transition: all 0.15s; }
+  .flyer-layout-btn:hover { background: var(--cream); border-color: var(--teal); }
+  .flyer-layout-btn.active { background: var(--teal); color: white; border-color: var(--teal-dark); }
+  .flyer-toggle-btn { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: white; font-family: 'Poppins', sans-serif; font-size: 11.5px; font-weight: 600; color: var(--text-soft); cursor: pointer; }
+  .flyer-toggle-btn.off { background: var(--cream); color: var(--muted); text-decoration: line-through; }
+  .flyer-preview-toolbar button.btn-print { padding: 8px 16px; border-radius: 20px; border: none; font-family: 'Poppins', sans-serif; font-size: 12.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); color: white; }
+  .flyer-preview-toolbar button.btn-print:hover { transform: translateY(-1px); }
+  .flyer-preview-toolbar button.btn-close { padding: 8px 14px; border-radius: 20px; background: var(--cream); color: var(--text-soft); border: 1px solid var(--border); font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .flyer-preview-toolbar button.btn-close:hover { background: white; }
+  @media print { .flyer-preview-toolbar { display: none !important; } }
 
   .footer { margin-top: auto; padding: 12px 22px; border-top: 1px solid var(--border-soft); font-size: 10.5px; color: var(--muted); background: var(--cream); line-height: 1.5; }
   .footer strong { color: var(--teal-darker); }
@@ -268,14 +541,14 @@
         <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
       </svg>
     </button>
-    <div class="header">
+    <div class="header" data-block-id="header">
       <div class="brand">Wilkerson Homes Inc.</div>
       <h1>Where We Build</h1>
       <div class="sub">Southern Maryland · Charles & St. Mary's Counties</div>
-      <div class="tagline">“Come Home to Wilkerson.”</div>
+      <div class="tagline" id="editTagline" contenteditable="false" data-placeholder="Add a tagline…">“Come Home to Wilkerson.”</div>
     </div>
 
-    <div class="section">
+    <div class="section" data-block-id="communities">
       <h2>Our Communities</h2>
       <div id="communitiesList"></div>
       <div class="hero-stat">
@@ -284,7 +557,7 @@
       </div>
     </div>
 
-    <div class="section">
+    <div class="section" data-block-id="legend">
       <h2>Map Layers</h2>
       <label class="layer-toggle" data-layer="military">
         <input type="checkbox" checked />
@@ -318,7 +591,7 @@
       </label>
     </div>
 
-    <div class="section">
+    <div class="section section-rings">
       <h2>Distance Rings</h2>
       <div class="ring-controls">
         <button class="ring-btn" data-ring="0">Off</button>
@@ -328,19 +601,41 @@
       </div>
     </div>
 
-    <div class="footer">
+    <div class="section section-print">
+      <button class="print-flyer-btn" id="printFlyerBtn" type="button">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        <span>Preview Flyer</span>
+      </button>
+      <div style="font-size:10.5px; color:var(--muted); text-align:center; margin-top:6px; line-height:1.4;">
+        Opens a printable one-page summary.
+      </div>
+    </div>
+
+    <div class="footer" data-block-id="footer">
       Map by <strong>Klein Meridian Consulting</strong> · Data: OpenStreetMap<br/>
       Coordinates approximate · For marketing reference only.
     </div>
   </aside>
 
-  <div class="map-container">
+  <div class="map-container" data-block-id="map">
     <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
         <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>
       </svg>
     </button>
     <div class="map-title"><strong>Interactive Map</strong> · Click any marker</div>
+    <div class="flyer-map-legend" id="flyerMapLegend">
+      <span class="flyer-map-legend-item"><span class="fmli-icon fmli-logo"></span>Wilkerson</span>
+      <span class="flyer-map-legend-item"><span class="fmli-icon" style="background:var(--c-military)">★</span>Military</span>
+      <span class="flyer-map-legend-item"><span class="fmli-icon" style="background:var(--c-medical)">+</span>Medical</span>
+      <span class="flyer-map-legend-item"><span class="fmli-icon" style="background:var(--c-college)">▲</span>CSM</span>
+      <span class="flyer-map-legend-item"><span class="fmli-icon" style="background:var(--c-shopping)">●</span>Shopping</span>
+      <span class="flyer-map-legend-item"><span class="fmli-icon" style="background:var(--c-hub)">◆</span>Hubs</span>
+    </div>
     <button class="back-to-regions" id="backToRegions" title="Show all regions">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
       All Regions
@@ -362,6 +657,12 @@
       <span class="mobile-legend-item"><span class="mini-icon" style="background:var(--c-shopping)">●</span>Shopping</span>
       <span class="mobile-legend-item"><span class="mini-icon" style="background:var(--c-hub)">◆</span>Hubs</span>
     </div>
+  </div>
+
+  <!-- Flyer-only CTA / contact block. Editable in preview mode. -->
+  <div class="flyer-cta" id="flyerCta" data-block-id="cta">
+    <div class="flyer-cta-headline" contenteditable="false" data-placeholder="Add a call-to-action headline…" id="editCtaHeadline">Ready to build your dream home?</div>
+    <div class="flyer-cta-contact" contenteditable="false" data-placeholder="Add phone · email · website…" id="editCtaContact">301-555-0000  ·  info@wilkersonhomesinc.com  ·  wilkersonhomesinc.com</div>
   </div>
 </div>
 
@@ -548,7 +849,6 @@ function loadBasemap(key) {
   document.getElementById('basemapToggle').addEventListener('click', () => {
     document.getElementById('basemapPicker').classList.toggle('open');
   });
-  // Close on outside click
   document.addEventListener('click', (e) => {
     if (!e.target.closest('#basemapPicker')) {
       document.getElementById('basemapPicker').classList.remove('open');
@@ -556,7 +856,6 @@ function loadBasemap(key) {
   });
 })();
 
-// Initial pick: URL param > localStorage > default
 const initialBasemap = params.get('basemap')
   || (function(){ try { return localStorage.getItem('wilkerson_basemap'); } catch(e){ return null; } })()
   || 'topo';
@@ -920,6 +1219,8 @@ document.getElementById('backToRegions').addEventListener('click', () => {
 backdropEl.addEventListener('click', () => setSidebar(false));
 map.on('click', () => setSidebar(false));
 
+// (flyer preview handlers are in the trailing <script> block after </div>)
+
 // Fit to all points
 const all = [...communities.map(x=>x.coords), ...military.map(x=>x.coords), ...hubs.map(x=>x.coords)];
 map.fitBounds(L.latLngBounds(all), { padding:[50,50] });
@@ -927,6 +1228,639 @@ map.fitBounds(L.latLngBounds(all), { padding:[50,50] });
 // Make sure map sizes to iframe after load
 window.addEventListener('resize', () => map.invalidateSize());
 setTimeout(() => map.invalidateSize(), 100);
+</script>
+
+<!-- Flyer preview toolbar — visible only during in-app flyer preview -->
+<div class="flyer-preview-toolbar" id="flyerToolbar">
+  <div class="flyer-toolbar-group">
+    <span class="flyer-toolbar-label">Preset</span>
+    <button class="flyer-layout-btn active" data-layout="top">Standard</button>
+    <button class="flyer-layout-btn" data-layout="split">Map First</button>
+    <button class="flyer-layout-btn" data-layout="hero">Hero</button>
+  </div>
+  <div class="flyer-toolbar-group">
+    <span class="flyer-toolbar-label">Focus</span>
+    <select class="flyer-select" id="flyerFocusSelect">
+      <option value="all">All Communities</option>
+    </select>
+  </div>
+  <div class="flyer-toolbar-group">
+    <span class="flyer-toolbar-label">Include</span>
+    <details class="flyer-dropdown" id="flyerCommDropdown">
+      <summary>Communities</summary>
+      <div class="flyer-dropdown-menu" id="flyerCommDropdownMenu">
+        <div class="flyer-dropdown-heading">Show on flyer</div>
+      </div>
+    </details>
+  </div>
+  <div class="flyer-toolbar-group">
+    <span class="flyer-toolbar-label">List</span>
+    <button class="flyer-layout-btn active" data-list-layout="cards">Cards</button>
+    <button class="flyer-layout-btn" data-list-layout="compact">Compact</button>
+    <button class="flyer-layout-btn" data-list-layout="grid">Grid</button>
+    <button class="flyer-layout-btn" data-list-layout="table">Table</button>
+  </div>
+  <div class="flyer-toolbar-group">
+    <span class="flyer-toolbar-label">Cols</span>
+    <button class="flyer-layout-btn" data-columns="1">1</button>
+    <button class="flyer-layout-btn active" data-columns="2">2</button>
+    <button class="flyer-layout-btn" data-columns="3">3</button>
+  </div>
+  <div class="flyer-toolbar-group">
+    <span class="flyer-toolbar-label">Align</span>
+    <button class="flyer-layout-btn active" data-align="left" title="Left align">⇤</button>
+    <button class="flyer-layout-btn" data-align="center" title="Center">↔</button>
+    <button class="flyer-layout-btn" data-align="right" title="Right align">⇥</button>
+  </div>
+  <div class="flyer-toolbar-group">
+    <span class="flyer-toolbar-label">Map</span>
+    <button class="flyer-layout-btn" data-map-size="s">S</button>
+    <button class="flyer-layout-btn active" data-map-size="m">M</button>
+    <button class="flyer-layout-btn" data-map-size="l">L</button>
+  </div>
+  <div class="flyer-toolbar-group">
+    <span class="flyer-toolbar-label">Text</span>
+    <button class="flyer-layout-btn" data-text-size="s">S</button>
+    <button class="flyer-layout-btn active" data-text-size="m">M</button>
+    <button class="flyer-layout-btn" data-text-size="l">L</button>
+  </div>
+  <div class="flyer-toolbar-group">
+    <span class="flyer-toolbar-label">Show</span>
+    <button class="flyer-toggle-btn" data-toggle="communities">Communities</button>
+    <button class="flyer-toggle-btn" data-toggle="herostat">Hero Stat</button>
+    <button class="flyer-toggle-btn" data-toggle="legend">Legend</button>
+    <button class="flyer-toggle-btn" data-toggle="cta">CTA</button>
+    <button class="flyer-toggle-btn" data-toggle="map">Map</button>
+  </div>
+  <div class="flyer-toolbar-group">
+    <button class="flyer-collapse-btn" id="flyerCollapseBtn" type="button" title="Hide controls">▾ Hide</button>
+    <button class="flyer-reset-btn" id="flyerResetBtn" type="button">Reset</button>
+    <button class="btn-print" id="flyerPrintBtn" type="button">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 6 2 18 2 18 9"/>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+        <rect x="6" y="14" width="12" height="8"/>
+      </svg>
+      Print / Save PDF
+    </button>
+    <button class="btn-close" id="flyerCloseBtn" type="button">Close</button>
+  </div>
+</div>
+
+<!-- Compact restore tab: shown only when the toolbar is collapsed -->
+<button class="flyer-restore-tab" id="flyerRestoreTab" type="button">
+  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 15 12 9 18 15"/></svg>
+  Show Controls
+</button>
+
+<script>
+// ===== FLYER STUDIO =====
+const EDITABLE_IDS = ['editTagline','editCtaHeadline','editCtaContact'];
+const TOGGLE_KEYS = ['communities','herostat','legend','cta','map'];
+const LS_KEY = 'wilkerson_flyer_studio';
+const DEFAULTS = {
+  layout: 'top', focus: 'all', mapSize: 'm', textSize: 'm',
+  hide: {} // { legend: true } means hidden
+};
+
+function readSaved() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch(e){ return {}; } }
+function writeSaved(patch) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify({...readSaved(), ...patch})); } catch(e){}
+}
+
+// Populate the Focus dropdown: "All", then per-city, then individual communities grouped by city
+(function initFocusSelect() {
+  const sel = document.getElementById('flyerFocusSelect');
+  if (!sel || typeof communities === 'undefined') return;
+  const byTown = {};
+  communities.forEach(c => { (byTown[c.town] ||= []).push(c); });
+
+  // "Focus by City" group
+  const cityGrp = document.createElement('optgroup');
+  cityGrp.label = 'Focus by City';
+  Object.keys(byTown).forEach(town => {
+    const opt = document.createElement('option');
+    opt.value = 'region:' + town;
+    opt.textContent = town + ', MD';
+    cityGrp.appendChild(opt);
+  });
+  sel.appendChild(cityGrp);
+
+  // Per-city groups of individual communities
+  Object.entries(byTown).forEach(([town, list]) => {
+    const grp = document.createElement('optgroup');
+    grp.label = town;
+    list.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name;
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
+  });
+})();
+
+// Restore saved text on load
+(function restoreText(){
+  const s = readSaved();
+  EDITABLE_IDS.forEach(id => {
+    if (s[id] != null) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = s[id];
+    }
+  });
+})();
+
+// Layout presets = quick block-order shortcuts
+const LAYOUT_PRESETS = {
+  top:   ['header','communities','legend','map','cta','footer'],
+  split: ['header','map','communities','legend','cta','footer'],
+  hero:  ['map','header','communities','cta','legend','footer']
+};
+function setLayout(layout) {
+  document.body.dataset.flyerLayout = layout;
+  document.querySelectorAll('.flyer-layout-btn[data-layout]').forEach(b => {
+    b.classList.toggle('active', b.dataset.layout === layout);
+  });
+  // Apply the preset order
+  const order = LAYOUT_PRESETS[layout] || LAYOUT_PRESETS.top;
+  if (flyerCanvas) {
+    order.forEach(id => {
+      const el = flyerCanvas.querySelector(`[data-block-id="${id}"]`);
+      if (el) flyerCanvas.appendChild(el);
+    });
+  }
+  writeSaved({ layout, blockOrder: order });
+  setTimeout(() => { try { map.invalidateSize(); } catch(e){} }, 120);
+}
+
+function setMapSize(size) {
+  document.body.dataset.flyerMapSize = size;
+  document.querySelectorAll('.flyer-layout-btn[data-map-size]').forEach(b => {
+    b.classList.toggle('active', b.dataset.mapSize === size);
+  });
+  writeSaved({ mapSize: size });
+  setTimeout(() => { try { map.invalidateSize(); } catch(e){} }, 120);
+}
+
+function setTextSize(size) {
+  document.body.dataset.flyerTextSize = size;
+  document.querySelectorAll('.flyer-layout-btn[data-text-size]').forEach(b => {
+    b.classList.toggle('active', b.dataset.textSize === size);
+  });
+  writeSaved({ textSize: size });
+}
+
+function setListLayout(layout) {
+  document.body.dataset.flyerList = layout;
+  document.querySelectorAll('.flyer-layout-btn[data-list-layout]').forEach(b => {
+    b.classList.toggle('active', b.dataset.listLayout === layout);
+  });
+  writeSaved({ listLayout: layout });
+}
+
+function setColumns(n) {
+  document.body.dataset.flyerColumns = n;
+  document.querySelectorAll('.flyer-layout-btn[data-columns]').forEach(b => {
+    b.classList.toggle('active', b.dataset.columns === n);
+  });
+  writeSaved({ columns: n });
+}
+
+function setAlign(align) {
+  document.body.dataset.flyerAlign = align;
+  document.querySelectorAll('.flyer-layout-btn[data-align]').forEach(b => {
+    b.classList.toggle('active', b.dataset.align === align);
+  });
+  writeSaved({ align });
+}
+
+// Community visibility (per-flyer toggle)
+function getHiddenCommunities() {
+  return new Set(readSaved().hiddenCommunities || []);
+}
+function setCommunityVisible(id, visible) {
+  const hidden = getHiddenCommunities();
+  if (visible) hidden.delete(id); else hidden.add(id);
+  writeSaved({ hiddenCommunities: [...hidden] });
+  applyCommunityVisibility();
+}
+function applyCommunityVisibility() {
+  const hidden = getHiddenCommunities();
+  // Sidebar cards
+  document.querySelectorAll('.community-card[data-zoom]').forEach(card => {
+    if (hidden.has(card.dataset.zoom)) card.setAttribute('data-comm-hidden', '1');
+    else card.removeAttribute('data-comm-hidden');
+  });
+  // Also hide empty town-group headers when every community in that town is hidden
+  document.querySelectorAll('.town-group[data-region]').forEach(tg => {
+    const townName = tg.dataset.region;
+    const townCommunities = communities.filter(c => c.town === townName);
+    const anyVisible = townCommunities.some(c => !hidden.has(c.id));
+    tg.style.display = anyVisible ? '' : 'none';
+  });
+  // Map markers — only touch inside flyer mode; interactive view stays clean
+  if (typeof communityMarkers === 'undefined' || !document.body.classList.contains('flyer-mode')) return;
+  communityMarkers.forEach(m => {
+    const isHidden = hidden.has(m.communityData.id);
+    const shouldShow = !isHidden && (activeRegion === m.communityData.town);
+    if (shouldShow) {
+      if (!map.hasLayer(m)) m.addTo(map);
+    } else {
+      if (map.hasLayer(m)) map.removeLayer(m);
+    }
+  });
+  // Region pills — hide any region whose communities are all deselected
+  Object.entries(regions).forEach(([name, r]) => {
+    const pill = regionMarkers[name];
+    if (!pill) return;
+    const anyVisible = r.communities.some(c => !hidden.has(c.id));
+    const shouldShow = anyVisible && name !== activeRegion;
+    if (shouldShow) {
+      if (!map.hasLayer(pill)) pill.addTo(map);
+    } else {
+      if (map.hasLayer(pill)) map.removeLayer(pill);
+    }
+  });
+}
+
+function initCommunityToggleDropdown() {
+  const menu = document.getElementById('flyerCommDropdownMenu');
+  if (!menu || menu.dataset.init) return;
+  menu.dataset.init = '1';
+  const hidden = getHiddenCommunities();
+  const byTown = {};
+  communities.forEach(c => { (byTown[c.town] ||= []).push(c); });
+  townOrder.forEach(town => {
+    (byTown[town] || []).forEach(c => {
+      const item = document.createElement('label');
+      item.className = 'flyer-dropdown-item';
+      const isChecked = !hidden.has(c.id);
+      item.innerHTML = `<input type="checkbox" value="${c.id}"${isChecked ? ' checked' : ''}><span>${c.name}</span><span class="fdi-town">${c.town}</span>`;
+      item.querySelector('input').addEventListener('change', (e) => setCommunityVisible(c.id, e.target.checked));
+      menu.appendChild(item);
+    });
+  });
+  const actions = document.createElement('div');
+  actions.className = 'flyer-dropdown-actions';
+  actions.innerHTML = `<button data-action="all">Include All</button><button data-action="none">Clear</button>`;
+  actions.querySelectorAll('button').forEach(b => {
+    b.addEventListener('click', (e) => {
+      e.preventDefault();
+      const showAll = b.dataset.action === 'all';
+      communities.forEach(c => setCommunityVisible(c.id, showAll));
+      menu.querySelectorAll('input[type=checkbox]').forEach(cb => { cb.checked = showAll; });
+    });
+  });
+  menu.appendChild(actions);
+}
+function syncCommunityToggleUI() {
+  const hidden = getHiddenCommunities();
+  document.querySelectorAll('#flyerCommDropdownMenu input[type=checkbox]').forEach(cb => {
+    cb.checked = !hidden.has(cb.value);
+  });
+}
+
+function setSectionVisible(key, visible) {
+  document.body.classList.toggle('flyer-hide-' + key, !visible);
+  document.querySelector(`.flyer-toggle-btn[data-toggle="${key}"]`)?.classList.toggle('off', !visible);
+  const hide = readSaved().hide || {};
+  hide[key] = !visible;
+  writeSaved({ hide });
+  setTimeout(() => { try { map.invalidateSize(); } catch(e){} }, 120);
+}
+
+function setFocus(value) {
+  // Parse value into type + target
+  //   "all"              → no focus
+  //   "region:Newburg"   → all communities in Newburg
+  //   "keswick" etc      → single community
+  let type = 'all', target = null;
+  if (value && value !== 'all') {
+    if (value.startsWith('region:')) {
+      type = 'region';
+      target = value.slice(7);
+    } else {
+      type = 'single';
+      target = value;
+    }
+  }
+  document.body.dataset.flyerFocus = value || 'all';
+  document.body.dataset.flyerFocusType = type;
+  const sel = document.getElementById('flyerFocusSelect');
+  sel.value = value || 'all';
+  sel.classList.toggle('focused', type !== 'all');
+
+  // Reset marker classes
+  document.querySelectorAll('.community-card').forEach(c => c.classList.remove('focus-target'));
+  document.querySelectorAll('.town-group').forEach(tg => tg.classList.remove('focus-owner'));
+
+  if (type === 'single') {
+    const card = document.querySelector(`.community-card[data-zoom="${target}"]`);
+    if (card) {
+      card.classList.add('focus-target', 'expanded');
+      card.closest('.town-group')?.classList.add('focus-owner', 'expanded');
+    }
+    const c = communities.find(x => x.id === target);
+    if (c) {
+      if (activeRegion !== c.town) {
+        activeRegion = c.town;
+        updateRegionView();
+        updateSidebarRegionState();
+      }
+      setTimeout(() => map.setView(c.coords, 13), 200);
+    }
+  } else if (type === 'region') {
+    // Mark that town's group as focus-owner
+    const group = document.querySelector(`.town-group[data-region="${target}"]`);
+    if (group) group.classList.add('focus-owner', 'expanded');
+    if (activeRegion !== target) {
+      activeRegion = target;
+      updateRegionView();
+      updateSidebarRegionState();
+    }
+    // Fit to that region's communities
+    const r = regions[target];
+    if (r) {
+      const b = L.latLngBounds(r.communities.map(c => c.coords)).pad(0.5);
+      setTimeout(() => map.flyToBounds(b, { duration: 0.6, maxZoom: 12 }), 200);
+    }
+  } else {
+    // "all" — fit to everything
+    const all = [...communities.map(x=>x.coords), ...hubs.map(x=>x.coords)];
+    setTimeout(() => map.fitBounds(L.latLngBounds(all), { padding: [30, 30] }), 200);
+  }
+
+  writeSaved({ focus: value || 'all' });
+  setTimeout(() => { try { map.invalidateSize(); } catch(e){} }, 300);
+}
+
+function applySavedState() {
+  const s = readSaved();
+  setLayout(s.layout || DEFAULTS.layout);
+  setMapSize(s.mapSize || DEFAULTS.mapSize);
+  setTextSize(s.textSize || DEFAULTS.textSize);
+  setListLayout(s.listLayout || 'cards');
+  setColumns(s.columns || '2');
+  setAlign(s.align || 'left');
+  syncCommunityToggleUI();
+  applyCommunityVisibility();
+  const hide = s.hide || {};
+  TOGGLE_KEYS.forEach(k => setSectionVisible(k, !hide[k]));
+  setFocus(s.focus || DEFAULTS.focus);
+  restoreBlockOrder(s.blockOrder);
+}
+
+// ===== DRAG-TO-REORDER =====
+// Original DOM position of each block (parent + next-sibling), captured on first flyer entry
+const originalBlockHome = {};
+function captureBlockHomes() {
+  document.querySelectorAll('[data-block-id]').forEach(el => {
+    if (originalBlockHome[el.dataset.blockId]) return;
+    originalBlockHome[el.dataset.blockId] = {
+      parent: el.parentElement,
+      nextSibling: el.nextElementSibling
+    };
+  });
+}
+function restoreBlockHomes() {
+  Object.entries(originalBlockHome).forEach(([id, home]) => {
+    const el = document.querySelector(`[data-block-id="${id}"]`);
+    if (!el || !home.parent) return;
+    if (home.nextSibling && home.parent.contains(home.nextSibling)) {
+      home.parent.insertBefore(el, home.nextSibling);
+    } else {
+      home.parent.appendChild(el);
+    }
+  });
+}
+
+// A "flyer canvas" container. In preview, we move all draggable blocks into it
+// so they're siblings and can be freely reordered. On exit, restore each block
+// to its original DOM position via originalBlockHome.
+let flyerCanvas = null;
+function setupFlyerCanvas() {
+  captureBlockHomes();
+  if (!flyerCanvas) {
+    flyerCanvas = document.createElement('div');
+    flyerCanvas.className = 'flyer-canvas';
+    flyerCanvas.id = 'flyerCanvas';
+  }
+  const app = document.querySelector('.app');
+  app.prepend(flyerCanvas);
+  // Move each draggable block into the canvas in the current order
+  const blocks = ['header','communities','legend','map','cta','footer'];
+  blocks.forEach(id => {
+    const el = document.querySelector(`[data-block-id="${id}"]`);
+    if (el) flyerCanvas.appendChild(el);
+  });
+}
+function teardownFlyerCanvas() {
+  restoreBlockHomes();
+  if (flyerCanvas && flyerCanvas.parentElement) {
+    flyerCanvas.remove();
+  }
+}
+
+function saveBlockOrder() {
+  if (!flyerCanvas) return;
+  const order = Array.from(flyerCanvas.querySelectorAll('[data-block-id]')).map(el => el.dataset.blockId);
+  writeSaved({ blockOrder: order });
+}
+function restoreBlockOrder(order) {
+  if (!flyerCanvas || !order) return;
+  order.forEach(id => {
+    const el = flyerCanvas.querySelector(`[data-block-id="${id}"]`);
+    if (el) flyerCanvas.appendChild(el);
+  });
+  setTimeout(() => { try { map.invalidateSize(); } catch(e){} }, 100);
+}
+
+function initDragReorder() {
+  if (!flyerCanvas) return;
+  const gripSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.4"/><circle cx="9" cy="12" r="1.4"/><circle cx="9" cy="18" r="1.4"/><circle cx="15" cy="6" r="1.4"/><circle cx="15" cy="12" r="1.4"/><circle cx="15" cy="18" r="1.4"/></svg>`;
+  const blocks = flyerCanvas.querySelectorAll('[data-block-id]');
+  blocks.forEach(el => {
+    el.classList.add('flyer-draggable');
+    // Ensure the block is positioned relatively for the absolute-positioned handle
+    if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+    // Add the handle only if it doesn't already exist
+    if (!el.querySelector(':scope > .flyer-drag-handle')) {
+      const handle = document.createElement('div');
+      handle.className = 'flyer-drag-handle';
+      handle.setAttribute('draggable', 'true');
+      handle.setAttribute('title', 'Drag to reorder');
+      handle.innerHTML = gripSvg;
+      el.appendChild(handle);
+    }
+  });
+
+  let dragged = null;
+  flyerCanvas.addEventListener('dragstart', (e) => {
+    const handle = e.target.closest('.flyer-drag-handle');
+    if (!handle) { e.preventDefault(); return; }
+    const block = handle.closest('.flyer-draggable');
+    if (!block) return;
+    dragged = block;
+    block.classList.add('dragging');
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+      // Use a transparent 1x1 drag image to avoid the ghost visual jitter
+      try {
+        const img = new Image();
+        img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        e.dataTransfer.setDragImage(img, 0, 0);
+      } catch (err) {}
+    }
+  });
+  flyerCanvas.addEventListener('dragend', () => {
+    if (dragged) { dragged.classList.remove('dragging'); dragged = null; }
+    document.querySelectorAll('.flyer-drop-target-above, .flyer-drop-target-below').forEach(el => {
+      el.classList.remove('flyer-drop-target-above', 'flyer-drop-target-below');
+    });
+    saveBlockOrder();
+    setTimeout(() => { try { map.invalidateSize(); } catch(e){} }, 100);
+  });
+  flyerCanvas.addEventListener('dragover', (e) => {
+    if (!dragged) return;
+    e.preventDefault();
+    const target = e.target.closest('.flyer-draggable');
+    if (!target || target === dragged) return;
+    const rect = target.getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+    document.querySelectorAll('.flyer-drop-target-above, .flyer-drop-target-below').forEach(el => {
+      el.classList.remove('flyer-drop-target-above', 'flyer-drop-target-below');
+    });
+    target.classList.add(e.clientY < midY ? 'flyer-drop-target-above' : 'flyer-drop-target-below');
+  });
+  flyerCanvas.addEventListener('drop', (e) => {
+    if (!dragged) return;
+    e.preventDefault();
+    const target = e.target.closest('.flyer-draggable');
+    if (!target || target === dragged) return;
+    const rect = target.getBoundingClientRect();
+    (e.clientY < rect.top + rect.height / 2) ? target.before(dragged) : target.after(dragged);
+  });
+}
+
+function resetFlyerState() {
+  try { localStorage.removeItem(LS_KEY); } catch(e){}
+  // Reset the community-visibility checkboxes to all-included
+  document.querySelectorAll('#flyerCommDropdownMenu input[type=checkbox]').forEach(cb => { cb.checked = true; });
+  applySavedState();
+  EDITABLE_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (id === 'editTagline') el.textContent = '“Come Home to Wilkerson.”';
+    if (id === 'editCtaHeadline') el.textContent = 'Ready to build your dream home?';
+    if (id === 'editCtaContact') el.textContent = '301-555-0000  ·  info@wilkersonhomesinc.com  ·  wilkersonhomesinc.com';
+  });
+}
+
+function enterFlyerMode(preview) {
+  document.body.classList.add('flyer-mode');
+  if (preview) {
+    document.body.classList.add('flyer-preview');
+    EDITABLE_IDS.forEach(id => document.getElementById(id)?.setAttribute('contenteditable', 'true'));
+  }
+  document.querySelectorAll('.town-group').forEach(tg => tg.classList.add('expanded'));
+  document.querySelectorAll('.community-card').forEach(c => c.classList.add('expanded'));
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('show');
+  // Reparent all draggable blocks into a canvas so they're siblings for reorder
+  setupFlyerCanvas();
+  if (preview) {
+    initDragReorder();
+    initCommunityToggleDropdown();
+  }
+  applySavedState();
+  setTimeout(() => { try { map.invalidateSize(); } catch(e){} }, 150);
+}
+function exitFlyerMode() {
+  document.body.classList.remove('flyer-mode', 'flyer-preview', 'toolbar-collapsed');
+  TOGGLE_KEYS.forEach(k => document.body.classList.remove('flyer-hide-' + k));
+  // Restore any communities hidden while in flyer mode — interactive view shows everything
+  document.querySelectorAll('.community-card[data-comm-hidden]').forEach(el => el.removeAttribute('data-comm-hidden'));
+  document.querySelectorAll('.town-group[data-region]').forEach(tg => { tg.style.display = ''; });
+  if (typeof communityMarkers !== 'undefined') {
+    communityMarkers.forEach(m => {
+      if (activeRegion === m.communityData.town && !map.hasLayer(m)) m.addTo(map);
+    });
+  }
+  if (typeof regionMarkers !== 'undefined') {
+    Object.entries(regionMarkers).forEach(([name, m]) => {
+      if (name !== activeRegion && !map.hasLayer(m)) m.addTo(map);
+    });
+  }
+  delete document.body.dataset.flyerLayout;
+  delete document.body.dataset.flyerMapSize;
+  delete document.body.dataset.flyerTextSize;
+  delete document.body.dataset.flyerList;
+  delete document.body.dataset.flyerColumns;
+  delete document.body.dataset.flyerAlign;
+  delete document.body.dataset.flyerFocus;
+  delete document.body.dataset.flyerFocusType;
+  document.querySelectorAll('.community-card').forEach(c => c.classList.remove('focus-target'));
+  document.querySelectorAll('.town-group').forEach(tg => tg.classList.remove('focus-owner'));
+  document.querySelectorAll('.flyer-draggable').forEach(el => {
+    el.removeAttribute('draggable');
+    el.classList.remove('flyer-draggable');
+    if (el.style.position) el.style.position = '';
+  });
+  document.querySelectorAll('.flyer-drag-handle').forEach(el => el.remove());
+  EDITABLE_IDS.forEach(id => document.getElementById(id)?.setAttribute('contenteditable', 'false'));
+  teardownFlyerCanvas();
+  setTimeout(() => { try { map.invalidateSize(); } catch(e){} }, 100);
+}
+
+// Wire up controls
+document.getElementById('printFlyerBtn').addEventListener('click', () => enterFlyerMode(true));
+document.getElementById('flyerPrintBtn').addEventListener('click', () => {
+  document.body.classList.remove('flyer-preview');
+  EDITABLE_IDS.forEach(id => document.getElementById(id)?.setAttribute('contenteditable', 'false'));
+  setTimeout(() => window.print(), 150);
+});
+document.getElementById('flyerCloseBtn').addEventListener('click', exitFlyerMode);
+document.getElementById('flyerResetBtn').addEventListener('click', resetFlyerState);
+document.getElementById('flyerCollapseBtn').addEventListener('click', () => {
+  document.body.classList.add('toolbar-collapsed');
+});
+document.getElementById('flyerRestoreTab').addEventListener('click', () => {
+  document.body.classList.remove('toolbar-collapsed');
+});
+
+document.querySelectorAll('.flyer-layout-btn[data-layout]').forEach(b =>
+  b.addEventListener('click', () => setLayout(b.dataset.layout)));
+document.querySelectorAll('.flyer-layout-btn[data-map-size]').forEach(b =>
+  b.addEventListener('click', () => setMapSize(b.dataset.mapSize)));
+document.querySelectorAll('.flyer-layout-btn[data-text-size]').forEach(b =>
+  b.addEventListener('click', () => setTextSize(b.dataset.textSize)));
+document.querySelectorAll('.flyer-layout-btn[data-list-layout]').forEach(b =>
+  b.addEventListener('click', () => setListLayout(b.dataset.listLayout)));
+document.querySelectorAll('.flyer-layout-btn[data-columns]').forEach(b =>
+  b.addEventListener('click', () => setColumns(b.dataset.columns)));
+document.querySelectorAll('.flyer-layout-btn[data-align]').forEach(b =>
+  b.addEventListener('click', () => setAlign(b.dataset.align)));
+
+document.querySelectorAll('.flyer-toggle-btn[data-toggle]').forEach(b => {
+  b.addEventListener('click', () => {
+    const key = b.dataset.toggle;
+    const isOff = b.classList.contains('off');
+    setSectionVisible(key, isOff); // if off, turn back on
+  });
+});
+
+document.getElementById('flyerFocusSelect').addEventListener('change', (e) => {
+  setFocus(e.target.value);
+});
+
+EDITABLE_IDS.forEach(id => {
+  const el = document.getElementById(id);
+  el?.addEventListener('blur', () => writeSaved({ [id]: el.textContent.trim() }));
+});
+
+window.addEventListener('beforeprint', () => enterFlyerMode(false));
+window.addEventListener('afterprint', exitFlyerMode);
 </script>
 </body>
 </html>
